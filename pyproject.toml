@@ -21,4 +21,3 @@ build-backend = "flit_core.buildapi"
 
 [tool.bench.frappe-dependencies]
 frappe = ">=16.0.0,<17.0.0"
-education = "https://github.com/luminloop/education"
