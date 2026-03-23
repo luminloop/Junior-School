@@ -12,22 +12,23 @@ class TimetableGenerator(Document):
 def check_conflicts(day, from_time, to_time, teacher, room, student_group):
     """Check for scheduling conflicts with existing course schedules."""
     try:
+        # For junior school, we focus on teacher and student group conflicts
+        # Room conflicts are less critical as junior schools often use homerooms
         conflicts = frappe.db.sql(
             """
-                SELECT name FROM `tabCourse Schedule`
-                WHERE
-                    (instructor = %s AND room = %s AND student_group = %s)
-                    AND schedule_date = %s
-                    AND (
-                        (from_time < %s AND to_time > %s) OR  -- complete overlap
-                        (from_time >= %s AND from_time < %s) OR  -- start during current period
-                        (to_time > %s AND to_time <= %s) OR  -- end during current period
-                        (from_time <= %s AND to_time >= %s)  -- current period is contained within existing
-                    )
+            SELECT name FROM `tabCourse Schedule`
+            WHERE
+                (instructor = %s AND student_group = %s)
+                AND schedule_date = %s
+                AND (
+                    (from_time < %s AND to_time > %s) OR  -- complete overlap
+                    (from_time >= %s AND from_time < %s) OR  -- start during current period
+                    (to_time > %s AND to_time <= %s) OR  -- end during current period
+                    (from_time <= %s AND to_time >= %s)  -- current period is contained within existing
+                )
             """,
             (
                 teacher,
-                room,
                 student_group,
                 day.strftime("%Y-%m-%d"),
                 from_time.strftime("%H:%M:%S"),
@@ -36,7 +37,6 @@ def check_conflicts(day, from_time, to_time, teacher, room, student_group):
                 to_time.strftime("%H:%M:%S"),
                 from_time.strftime("%H:%M:%S"),
                 to_time.strftime("%H:%M:%S"),
-                from_time.strftime("%H:%M:%S"),
                 to_time.strftime("%H:%M:%S"),
             ),
             as_dict=1,
@@ -112,13 +112,14 @@ def check_temp_conflicts(schedule_entry, temp_schedule):
 
     for entry in temp_schedule:
         if entry["schedule_date"] == new_day:
-            # Check for resource conflicts - only consider real conflicts
+            # Check for resource conflicts - for junior school, focus on teacher and student group
+            # Room conflicts are less critical as junior schools often use homerooms/flexible spaces
             conflict_resources = []
 
             if entry["instructor"] == new_teacher:
                 conflict_resources.append("teacher")
-            if entry["room"] == new_room:
-                conflict_resources.append("room")
+            # if entry["room"] == new_room:  # Less critical for junior school
+            #     conflict_resources.append("room")
             if entry["student_group"] == new_group:
                 conflict_resources.append("student_group")
 
@@ -210,6 +211,7 @@ def load_configuration():
                 "stream",
                 "max_period_per_week",
                 "max_period_per_day",
+                "preferred_days",
             ],
         )
         subject_rules = frappe.get_all(
@@ -753,26 +755,36 @@ def first_pass(
                 if subject_stream_daily.get((day_str, subject, stream), 0) >= 1:
                     continue
 
-                # Try all teachers
-                for teacher_data in item["teachers"]:
-                    teacher = teacher_data["teacher"]
-                    teacher_subject = teacher_data["subject"]
-                    teacher_stream = teacher_data["stream"]
+                    # Try all teachers
+                    for teacher_data in item["teachers"]:
+                        teacher = teacher_data["teacher"]
+                        teacher_subject = teacher_data["subject"]
+                        teacher_stream = teacher_data["stream"]
+                        preferred_days = teacher_data.get("preferred_days", "")
 
-                    # Verify teacher match
-                    if teacher_subject != subject or teacher_stream != stream:
-                        continue
+                        # Verify teacher match
+                        if teacher_subject != subject or teacher_stream != stream:
+                            continue
 
-                    # Check teacher in period
-                    if (day_str, period_index, "teacher", teacher) in slot_lookup:
-                        continue
+                        # Check teacher in period
+                        if (day_str, period_index, "teacher", teacher) in slot_lookup:
+                            continue
 
-                    # Check workload
-                    if (
-                        teacher_workload[teacher]["daily"][day_str] >= max_daily
-                        or teacher_workload[teacher]["total"] >= max_weekly
-                    ):
-                        continue
+                        # Check workload
+                        if (
+                            teacher_workload[teacher]["daily"][day_str] >= max_daily
+                            or teacher_workload[teacher]["total"] >= max_weekly
+                        ):
+                            continue
+                            
+                        # Check preferred days (if specified)
+                        if preferred_days:
+                            # Convert day_str (YYYY-MM-DD) to day name
+                            from datetime import datetime
+                            day_obj = datetime.strptime(day_str, "%Y-%m-%d")
+                            day_name = day_obj.strftime("%A")  # Monday, Tuesday, etc.
+                            if day_name not in preferred_days:
+                                continue
 
                     # Get subject-specific rooms
                     available_rooms = room_by_subject.get(subject, [default_room])
@@ -938,17 +950,27 @@ def third_pass(
                 if subject_stream_daily.get((day_str, subject, stream), 0) >= 1:
                     continue
 
-                # Try all teachers
-                for teacher_data in item["teachers"]:
-                    teacher = teacher_data["teacher"]
+                     # Try all teachers
+                    for teacher_data in item["teachers"]:
+                        teacher = teacher_data["teacher"]
+                        preferred_days = teacher_data.get("preferred_days", "")
 
-                    # Check teacher in period
-                    if (day_str, period_index, "teacher", teacher) in slot_lookup:
-                        continue
+                        # Check teacher in period
+                        if (day_str, period_index, "teacher", teacher) in slot_lookup:
+                            continue
 
-                    # Check only daily workload
-                    if teacher_workload[teacher]["daily"][day_str] >= max_daily:
-                        continue
+                        # Check only daily workload
+                        if teacher_workload[teacher]["daily"][day_str] >= max_daily:
+                            continue
+                            
+                        # Check preferred days (if specified)
+                        if preferred_days:
+                            # Convert day_str (YYYY-MM-DD) to day name
+                            from datetime import datetime
+                            day_obj = datetime.strptime(day_str, "%Y-%m-%d")
+                            day_name = day_obj.strftime("%A")  # Monday, Tuesday, etc.
+                            if day_name not in preferred_days:
+                                continue
 
                     # Find any available room
                     room = default_room

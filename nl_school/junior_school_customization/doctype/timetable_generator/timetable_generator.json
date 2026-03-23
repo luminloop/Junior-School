@@ -132,38 +132,19 @@
    "label": "Teaching Rooms"
   },
   {
-   "fieldname": "teaching_rooms",
-   "fieldtype": "Table",
-   "label": "Teaching Rooms",
-   "options": "Teaching Rooms",
-   "reqd": 1
+    "fieldname": "teaching_rooms",
+    "fieldtype": "Table",
+    "label": "Teaching Rooms",
+    "options": "Teaching Rooms",
+    "reqd": 1
   },
   {
-   "fieldname": "section_break_jmyh",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "default_maximum_lessons_per_day",
-   "fieldtype": "Int",
-   "label": "Default Maximum Lessons Per Day"
-  },
-  {
-   "fieldname": "column_break_vvis",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "default_maximum_lessons_per_week",
-   "fieldtype": "Int",
-   "label": "Default Maximum Lessons Per Week"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "School",
-   "options": "Company",
-   "reqd": 1
+    "fieldname": "print_timetable_button",
+    "fieldtype": "Button",
+    "label": "Print Timetable",
+    "style": "success"
   }
- ],
+],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
