@@ -192,8 +192,8 @@ def get_period_slots(timetable_doc):
 def load_configuration():
     """Load timetable configuration from documents."""
     try:
-        timetable_doc = frappe.get_doc("Timetable Generator")
-        frappe.log(f"generated timetable:{timetable_doc.as_dict}")
+        timetable_doc = frappe.get_single("Timetable Generator")
+        frappe.log(f"generated timetable:{timetable_doc.as_dict()}")
         academic_term = frappe.get_doc("Academic Term", timetable_doc.academic_term)
         school = timetable_doc.company
 
