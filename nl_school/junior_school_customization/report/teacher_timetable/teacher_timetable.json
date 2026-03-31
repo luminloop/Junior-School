@@ -1,0 +1,7 @@
+{
+	"ref_doctype": "Course Schedule",
+	"report_name": "Teacher Timetable",
+	"report_type": "Script Report",
+	"is_standard": "Yes",
+	"disabled": 0
+}
