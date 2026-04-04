@@ -12,6 +12,14 @@ app_home = "/desk/scholarship"
 
 required_apps = ["education"]
 
+# Fixtures - data to be imported on install/migrate
+fixtures = [
+    {"dt": "Workflow State", "filters": [["workflow_state_name", "in", ["Draft", "Pending Approval", "Approved", "Rejected"]]]},
+    {"dt": "Workflow Action Master", "filters": [["workflow_action_name", "in", ["Submit for Approval", "Approve", "Reject", "Revise"]]]},
+    {"dt": "Workflow", "filters": [["workflow_name", "=", "Assessment Result Approval"]]},
+    {"dt": "Role", "filters": [["role_name", "in", ["Principal", "Academic Coordinator"]]]},
+]
+
 add_to_apps_screen = [
     {
         "name": app_name,
@@ -181,6 +189,14 @@ doc_events = {
         "before_submit": "nl_school.junior_school_customization.overrides.payment_entry.before_submit",
         # "on_submit": "nl_school.junior_school_customization.overrides.payment_entry.on_payment_submit",
         # "on_cancel": "nl_school.junior_school_customization.overrides.payment_entry.on_payment_cancel",
+    },
+    "Student Group": {
+        "before_save": "nl_school.junior_school_customization.controllers.user_permissions.remove_instructor_permissions_on_removal",
+        "on_update": "nl_school.junior_school_customization.controllers.user_permissions.sync_instructor_user_permissions",
+    },
+    "Instructor": {
+        "after_insert": "nl_school.junior_school_customization.controllers.user_permissions.setup_instructor_user_on_create",
+        "on_update": "nl_school.junior_school_customization.controllers.user_permissions.setup_instructor_user_on_create",
     },
 }
 # Scheduled Tasks

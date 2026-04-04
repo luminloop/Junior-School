@@ -1,0 +1,22 @@
+[
+    {
+        "doctype": "Workflow State",
+        "workflow_state_name": "Draft",
+        "style": "Warning"
+    },
+    {
+        "doctype": "Workflow State",
+        "workflow_state_name": "Pending Approval",
+        "style": "Primary"
+    },
+    {
+        "doctype": "Workflow State",
+        "workflow_state_name": "Approved",
+        "style": "Success"
+    },
+    {
+        "doctype": "Workflow State",
+        "workflow_state_name": "Rejected",
+        "style": "Danger"
+    }
+]
