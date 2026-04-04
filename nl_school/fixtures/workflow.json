@@ -1,6 +1,7 @@
 [
     {
         "doctype": "Workflow",
+        "name": "Assessment Result Approval",
         "workflow_name": "Assessment Result Approval",
         "document_type": "Assessment Result",
         "is_active": 1,

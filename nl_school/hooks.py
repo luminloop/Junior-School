@@ -17,7 +17,6 @@ fixtures = [
     {"dt": "Workflow State", "filters": [["workflow_state_name", "in", ["Draft", "Pending Approval", "Approved", "Rejected"]]]},
     {"dt": "Workflow Action Master", "filters": [["workflow_action_name", "in", ["Submit for Approval", "Approve", "Reject", "Revise"]]]},
     {"dt": "Workflow", "filters": [["workflow_name", "=", "Assessment Result Approval"]]},
-    {"dt": "Role", "filters": [["role_name", "in", ["Principal", "Academic Coordinator"]]]},
 ]
 
 add_to_apps_screen = [
