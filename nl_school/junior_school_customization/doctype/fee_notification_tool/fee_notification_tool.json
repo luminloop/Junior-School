@@ -1,0 +1,198 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-04-04 13:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "filters_section",
+  "academic_year",
+  "academic_term",
+  "column_break_filters",
+  "program",
+  "student_group",
+  "balance_filters_section",
+  "min_outstanding_amount",
+  "column_break_balance",
+  "only_overdue",
+  "notification_settings_section",
+  "notification_channel",
+  "column_break_channel",
+  "include_fee_breakdown",
+  "attach_statement_pdf",
+  "message_section",
+  "message_template",
+  "preview_section",
+  "preview_message",
+  "actions_section",
+  "send_notifications"
+ ],
+ "fields": [
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "academic_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Academic Year",
+   "options": "Academic Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "academic_term",
+   "fieldtype": "Link",
+   "label": "Academic Term",
+   "options": "Academic Term"
+  },
+  {
+   "fieldname": "column_break_filters",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "program",
+   "fieldtype": "Link",
+   "label": "Program",
+   "options": "Program"
+  },
+  {
+   "fieldname": "student_group",
+   "fieldtype": "Link",
+   "label": "Student Group",
+   "options": "Student Group"
+  },
+  {
+   "fieldname": "balance_filters_section",
+   "fieldtype": "Section Break",
+   "label": "Balance Filters"
+  },
+  {
+   "default": "0",
+   "description": "Only send to parents with balance greater than this amount",
+   "fieldname": "min_outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Minimum Outstanding Amount"
+  },
+  {
+   "fieldname": "column_break_balance",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Only include fees past due date",
+   "fieldname": "only_overdue",
+   "fieldtype": "Check",
+   "label": "Only Overdue Fees"
+  },
+  {
+   "fieldname": "notification_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Notification Settings"
+  },
+  {
+   "default": "Email",
+   "fieldname": "notification_channel",
+   "fieldtype": "Select",
+   "label": "Notification Channel",
+   "options": "Email\nSMS\nBoth",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_channel",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "include_fee_breakdown",
+   "fieldtype": "Check",
+   "label": "Include Fee Breakdown"
+  },
+  {
+   "default": "0",
+   "description": "Attach PDF statement to email (Email channel only)",
+   "fieldname": "attach_statement_pdf",
+   "fieldtype": "Check",
+   "label": "Attach Statement PDF"
+  },
+  {
+   "fieldname": "message_section",
+   "fieldtype": "Section Break",
+   "label": "Message Template"
+  },
+  {
+   "default": "Dear {{ guardian_name }},\n\nThis is a reminder regarding the school fees for {{ student_name }}.\n\n{% if fee_breakdown %}Fee Details:\n{% for fee in fee_breakdown %}- {{ fee.description }}: {{ currency }} {{ fee.amount }}\n{% endfor %}\n{% endif %}Total Outstanding: {{ currency }} {{ outstanding_amount }}\n{% if due_date %}Due Date: {{ due_date }}{% endif %}\n\nPlease arrange payment at your earliest convenience.\n\nFor any queries, please contact the school accounts office.\n\nRegards,\n{{ school_name }}",
+   "fieldname": "message_template",
+   "fieldtype": "Text",
+   "label": "Message Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "preview_section",
+   "fieldtype": "Section Break",
+   "label": "Preview",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "preview_message",
+   "fieldtype": "Text",
+   "label": "Preview Message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "actions_section",
+   "fieldtype": "Section Break",
+   "label": "Actions"
+  },
+  {
+   "fieldname": "send_notifications",
+   "fieldtype": "Button",
+   "label": "Send Fee Reminders",
+   "options": "primary"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-04-04 13:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Junior School Customization",
+ "name": "Fee Notification Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Academics User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

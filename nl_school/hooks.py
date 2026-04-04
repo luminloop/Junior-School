@@ -198,6 +198,7 @@ scheduler_events = {
     "Weekly": [
         "nl_school.junior_school_customization.utils.update_academic_term",
         "nl_school.junior_school_customization.utils.close_assessment_plan",
+        "nl_school.junior_school_customization.doctype.fee_notification_tool.fee_notification_tool.send_automated_fee_reminders",
     ],
 }
 

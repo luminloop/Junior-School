@@ -1,0 +1,165 @@
+<style>
+    .fee-statement {
+        font-family: Arial, sans-serif;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+    }
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 10px;
+    }
+    .header h2 {
+        margin: 5px 0;
+        color: #333;
+    }
+    .header h3 {
+        margin: 5px 0;
+        color: #555;
+    }
+    .statement-info {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .statement-info td {
+        padding: 5px 10px;
+        vertical-align: top;
+    }
+    .statement-info .label {
+        font-weight: bold;
+        width: 150px;
+    }
+    .fee-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    .fee-table th, .fee-table td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+    }
+    .fee-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+    .fee-table .amount {
+        text-align: right;
+    }
+    .total-row {
+        font-weight: bold;
+        background-color: #e6f3ff;
+    }
+    .outstanding-row {
+        font-weight: bold;
+        background-color: #ffe6e6;
+        color: #cc0000;
+    }
+    .footer {
+        margin-top: 30px;
+        padding-top: 10px;
+        border-top: 1px solid #ccc;
+        font-size: 12px;
+        color: #666;
+        text-align: center;
+    }
+    .due-notice {
+        background-color: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 10px;
+        margin: 15px 0;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="fee-statement">
+    <div class="header">
+        <h2>{{ school_name }}</h2>
+        <h3>FEE STATEMENT</h3>
+        <p>Date: {{ date }}</p>
+    </div>
+
+    <table class="statement-info">
+        <tr>
+            <td class="label">Student Name:</td>
+            <td>{{ student.student_name }}</td>
+            <td class="label">Program:</td>
+            <td>{{ student.program }}</td>
+        </tr>
+        <tr>
+            <td class="label">Student ID:</td>
+            <td>{{ student.student }}</td>
+            <td class="label">Statement Date:</td>
+            <td>{{ date }}</td>
+        </tr>
+    </table>
+
+    <table class="fee-table">
+        <thead>
+            <tr>
+                <th>Term</th>
+                <th>Fee Description</th>
+                <th class="amount">Amount ({{ currency }})</th>
+                <th class="amount">Outstanding ({{ currency }})</th>
+                <th>Due Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fee in student.fees %}
+            <tr>
+                <td rowspan="{{ fee.components | length + 1 if fee.components else 1 }}">
+                    {{ fee.academic_term or 'N/A' }}
+                </td>
+                <td colspan="4" style="font-weight: bold; background-color: #f9f9f9;">
+                    Fee #{{ fee.fee_name }}
+                </td>
+            </tr>
+            {% for component in fee.components %}
+            <tr>
+                <td>{{ component.fees_category }}</td>
+                <td class="amount">{{ "{:,.2f}".format(component.amount) }}</td>
+                <td class="amount">-</td>
+                <td>-</td>
+            </tr>
+            {% endfor %}
+            <tr style="background-color: #f5f5f5;">
+                <td></td>
+                <td><strong>Subtotal</strong></td>
+                <td class="amount"><strong>{{ "{:,.2f}".format(fee.grand_total) }}</strong></td>
+                <td class="amount"><strong>{{ "{:,.2f}".format(fee.outstanding) }}</strong></td>
+                <td>{{ fee.due_date or 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="2"><strong>TOTAL FEES</strong></td>
+                <td class="amount" colspan="3">
+                    <strong>{{ currency }} {{ "{:,.2f}".format(student.fees | sum(attribute='grand_total')) }}</strong>
+                </td>
+            </tr>
+            <tr class="outstanding-row">
+                <td colspan="2"><strong>TOTAL OUTSTANDING</strong></td>
+                <td class="amount" colspan="3">
+                    <strong>{{ currency }} {{ "{:,.2f}".format(student.total_outstanding) }}</strong>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    {% if student.total_outstanding > 0 %}
+    <div class="due-notice">
+        <strong>Notice:</strong> Please arrange payment of the outstanding balance at your earliest convenience. 
+        For any queries or to set up a payment plan, please contact the school accounts office.
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>This is a computer-generated statement. For queries, please contact the school accounts office.</p>
+        <p>{{ school_name }}</p>
+    </div>
+</div>
