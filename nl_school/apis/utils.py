@@ -158,7 +158,7 @@ class ModifiedStudentAttendance(StudentAttendance):
                     "date": self.date,
                     "docstatus": ("!=", 2),
                     "name": ("!=", self.name),
-                    "custom_shift": self.custom_shift,
+                    "custom_shift": self.get("custom_shift"),
                 },
             )
 
@@ -168,7 +168,7 @@ class ModifiedStudentAttendance(StudentAttendance):
                 _(
                     "Student Attendance record {0} already exists against the Student {1} with shift {2}"
                 ).format(
-                    record, frappe.bold(self.student), frappe.bold(self.custom_shift)
+                    record, frappe.bold(self.student), frappe.bold(self.get("custom_shift"))
                 ),
                 title=_("Duplicate Entry Test"),
             )

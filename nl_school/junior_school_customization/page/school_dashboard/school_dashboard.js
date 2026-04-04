@@ -192,7 +192,7 @@ class SchoolDashboard {
       { label: "Mark Attendance", route: "/desk/student-attendance-tool", icon: "tick" },
       { label: "Collect Fees", route: "/desk/sales-invoice/new", icon: "money-coins-1" },
       { label: "New Enrollment", route: "/desk/program-enrollment/new", icon: "add" },
-      { label: "View Timetable", route: "/desk/school-timetable", icon: "today" },
+      { label: "View Timetable", route: "/desk/education-timetable", icon: "today" },
       { label: "Assessment Results", route: "/desk/assessment-result", icon: "chart" },
       { label: "Student List", route: "/desk/student", icon: "list-alt" }
     ];

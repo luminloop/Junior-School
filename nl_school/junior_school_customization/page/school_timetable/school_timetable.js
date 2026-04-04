@@ -6,34 +6,36 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
   });
 
   $(page.body).append(`
-        <div style="position: absolute; top: 10px; right: 20px;">
-            <button class="btn btn-success" id="btn-print">Print</button>
-        </div>
+        <div class="timetable-controls">
+            <div class="print-btn-wrapper">
+                <button class="btn btn-success" id="btn-print">Print</button>
+            </div>
 
-        <div class="text-center p-3";">
-            <div class="d-flex flex-wrap justify-content-center gap-2 mt-2">
-                <div class="form-group mr-2" style="min-width: 150px;">
-                    <select id="level-dropdown" class="form-control">
-                        <option value="">All Levels</option>
-                        <option value="pre-primary">Pre-Primary</option>
-                        <option value="primary">Primary</option>
-                    </select>
-                </div>
+            <div class="text-center p-3">
+                <div class="d-flex flex-wrap justify-content-center gap-2 mt-2 filter-controls">
+                    <div class="form-group mr-2" style="min-width: 150px;">
+                        <select id="level-dropdown" class="form-control">
+                            <option value="">All Levels</option>
+                            <option value="pre-primary">Pre-Primary</option>
+                            <option value="primary">Primary</option>
+                        </select>
+                    </div>
 
-                <div class="form-group mr-2" style="min-width: 150px;">
-                    <select id="teacher-dropdown" class="form-control">
-                        <option value="">All Teachers</option>
-                    </select>
-                </div>
+                    <div class="form-group mr-2" style="min-width: 150px;">
+                        <select id="teacher-dropdown" class="form-control">
+                            <option value="">All Teachers</option>
+                        </select>
+                    </div>
 
-                <div class="form-group mr-2" style="min-width: 150px;">
-                    <select id="stream-dropdown" class="form-control">
-                        <option value="">All Streams</option>
-                    </select>
-                </div>
+                    <div class="form-group mr-2" style="min-width: 150px;">
+                        <select id="stream-dropdown" class="form-control">
+                            <option value="">All Streams</option>
+                        </select>
+                    </div>
 
-                <div>
-                    <button class="btn btn-primary" id="btn-reset">Clear Filters</button>
+                    <div>
+                        <button class="btn btn-primary" id="btn-reset">Clear Filters</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -131,7 +133,145 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
   customStyles.innerHTML = `
         /* Increase time row height */
         .fc-timegrid-slot {
-            height: 60px !important; /* Adjust this value to your preference */
+            height: 60px !important;
+        }
+
+        /* Print button default positioning */
+        .print-btn-wrapper {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .timetable-controls {
+            position: relative;
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            /* Print button repositioning */
+            .print-btn-wrapper {
+                position: static !important;
+                text-align: center;
+                margin: 10px 0;
+            }
+            
+            .print-btn-wrapper .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            /* Filter dropdowns stack vertically on mobile */
+            .filter-controls {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                padding: 10px !important;
+            }
+            
+            .filter-controls .form-group {
+                width: 100% !important;
+                min-width: 100% !important;
+                margin-right: 0 !important;
+                margin-bottom: 10px;
+            }
+            
+            .filter-controls > div {
+                width: 100%;
+            }
+            
+            .filter-controls .btn {
+                width: 100%;
+            }
+
+            /* Calendar mobile adjustments */
+            .fc {
+                font-size: 12px !important;
+            }
+            
+            .fc-toolbar {
+                flex-direction: column !important;
+                gap: 10px;
+            }
+            
+            .fc-toolbar-chunk {
+                display: flex;
+                justify-content: center;
+            }
+            
+            .fc-header-toolbar {
+                margin-bottom: 1em !important;
+            }
+            
+            .fc-timegrid-slot {
+                height: 45px !important;
+            }
+            
+            .fc-event-title {
+                font-size: 10px !important;
+                white-space: normal !important;
+                overflow: visible !important;
+            }
+            
+            .fc-timegrid-event {
+                min-height: 40px !important;
+            }
+            
+            /* View buttons on mobile */
+            .fc-dayGridMonth-button,
+            .fc-timeGridWeek-button,
+            .fc-timeGridDay-button {
+                font-size: 11px !important;
+                padding: 4px 8px !important;
+            }
+
+            /* Modal adjustments for mobile */
+            .modal-dialog {
+                margin: 10px !important;
+                max-width: calc(100% - 20px) !important;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-row .form-group {
+                width: 100% !important;
+                max-width: 100% !important;
+                flex: none !important;
+            }
+            
+            .form-row .col-md-6 {
+                max-width: 100% !important;
+                flex: 0 0 100% !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .fc {
+                font-size: 10px !important;
+            }
+            
+            .fc-col-header-cell-cushion {
+                font-size: 10px !important;
+            }
+            
+            .fc-timegrid-slot-label-cushion {
+                font-size: 9px !important;
+            }
+            
+            .fc-event-title {
+                font-size: 9px !important;
+            }
+            
+            .fc-button {
+                font-size: 10px !important;
+                padding: 3px 6px !important;
+            }
+            
+            .fc-toolbar-title {
+                font-size: 14px !important;
+            }
         }
     `;
   document.head.appendChild(customStyles);
@@ -213,8 +353,12 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
       calendar.destroy();
     }
 
+    // Detect mobile and set appropriate initial view
+    const isMobile = window.innerWidth <= 768;
+    const initialView = isMobile ? "timeGridDay" : "timeGridWeek";
+
     calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: "timeGridWeek",
+      initialView: initialView,
       headerToolbar: {
         left: "prev,next today",
         center: "title",
@@ -226,6 +370,9 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
       allDaySlot: false,
       nowIndicator: true,
       editable: true,
+      // Responsive height
+      height: isMobile ? "auto" : null,
+      expandRows: !isMobile,
       eventClick: function (info) {
         openEditModal(info.event.id);
       },
@@ -492,6 +639,29 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
     selectedFilter = null;
     selectedValue = "";
     render_calendar();
+  });
+
+  // Handle window resize for responsive calendar
+  let resizeTimeout;
+  $(window).on("resize", function () {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function () {
+      if (calendar) {
+        const isMobile = window.innerWidth <= 768;
+        const currentView = calendar.view.type;
+        
+        // Switch to day view on mobile if currently on week view
+        if (isMobile && currentView === "timeGridWeek") {
+          calendar.changeView("timeGridDay");
+        }
+        // Switch to week view on desktop if currently on day view
+        else if (!isMobile && currentView === "timeGridDay") {
+          calendar.changeView("timeGridWeek");
+        }
+        
+        calendar.updateSize();
+      }
+    }, 250);
   });
 
   $("#level-dropdown").on("change", function () {
