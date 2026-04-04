@@ -1,0 +1,168 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-04-04 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "filters_section",
+  "academic_year",
+  "academic_term",
+  "column_break_filters",
+  "program",
+  "student_group",
+  "assessment_group",
+  "notification_settings_section",
+  "notification_channel",
+  "column_break_channel",
+  "include_scores",
+  "include_ranking",
+  "message_section",
+  "message_template",
+  "preview_section",
+  "preview_message",
+  "actions_section",
+  "send_notifications"
+ ],
+ "fields": [
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "academic_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Academic Year",
+   "options": "Academic Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "academic_term",
+   "fieldtype": "Link",
+   "label": "Academic Term",
+   "options": "Academic Term"
+  },
+  {
+   "fieldname": "column_break_filters",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "program",
+   "fieldtype": "Link",
+   "label": "Program",
+   "options": "Program"
+  },
+  {
+   "fieldname": "student_group",
+   "fieldtype": "Link",
+   "label": "Student Group",
+   "options": "Student Group"
+  },
+  {
+   "fieldname": "assessment_group",
+   "fieldtype": "Link",
+   "label": "Assessment Group",
+   "options": "Assessment Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "notification_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Notification Settings"
+  },
+  {
+   "default": "Email",
+   "fieldname": "notification_channel",
+   "fieldtype": "Select",
+   "label": "Notification Channel",
+   "options": "Email\nSMS\nBoth",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_channel",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "include_scores",
+   "fieldtype": "Check",
+   "label": "Include Subject Scores"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_ranking",
+   "fieldtype": "Check",
+   "label": "Include Class Ranking"
+  },
+  {
+   "fieldname": "message_section",
+   "fieldtype": "Section Break",
+   "label": "Message Template"
+  },
+  {
+   "default": "Dear {{ guardian_name }},\n\nThis is to inform you about {{ student_name }}'s academic performance for {{ academic_term }}.\n\n{% if scores %}Subject Scores:\n{% for score in scores %}- {{ score.course }}: {{ score.total_score }}% ({{ score.grade }})\n{% endfor %}{% endif %}\n{% if average %}Overall Average: {{ average }}%{% endif %}\n{% if ranking %}\nClass Rank: {{ class_rank }} out of {{ class_total }}{% endif %}\n\nPlease contact the school for any queries.\n\nRegards,\n{{ school_name }}",
+   "fieldname": "message_template",
+   "fieldtype": "Text",
+   "label": "Message Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "preview_section",
+   "fieldtype": "Section Break",
+   "label": "Preview",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "preview_message",
+   "fieldtype": "Text",
+   "label": "Preview Message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "actions_section",
+   "fieldtype": "Section Break",
+   "label": "Actions"
+  },
+  {
+   "fieldname": "send_notifications",
+   "fieldtype": "Button",
+   "label": "Send Notifications",
+   "options": "primary"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-04-04 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Junior School Customization",
+ "name": "Grade Notification Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Academics User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
