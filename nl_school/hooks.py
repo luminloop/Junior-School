@@ -171,7 +171,8 @@ override_doctype_class = {
 
 doc_events = {
     "Assessment Result": {
-        "on_submit": "nl_school.junior_school_customization.controllers.assessment_result.before_submit"
+        "before_submit": "nl_school.junior_school_customization.controllers.assessment_result.before_submit",
+        "on_submit": "nl_school.junior_school_customization.controllers.assessment_result.on_submit",
     },
     "Student": {
         "before_save": "nl_school.junior_school_customization.utils.before_save",
