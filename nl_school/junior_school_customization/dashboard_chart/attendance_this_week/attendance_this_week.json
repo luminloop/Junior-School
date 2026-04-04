@@ -1,0 +1,18 @@
+{
+  "doctype": "Dashboard Chart",
+  "name": "Attendance This Week",
+  "chart_name": "Attendance This Week",
+  "chart_type": "Group By",
+  "document_type": "Student Attendance",
+  "group_by_based_on": "status",
+  "group_by_type": "Count",
+  "number_of_groups": 5,
+  "type": "Percentage",
+  "filters_json": "[[\"Student Attendance\", \"date\", \"Timespan\", \"this week\", false]]",
+  "dynamic_filters_json": "[]",
+  "is_public": 1,
+  "is_standard": 1,
+  "module": "Junior School Customization",
+  "timeseries": 0,
+  "custom_options": "{\"colors\": [\"#10B981\", \"#EF4444\", \"#F59E0B\"]}"
+}

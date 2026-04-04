@@ -1,0 +1,18 @@
+{
+  "doctype": "Dashboard Chart",
+  "name": "Gender Distribution",
+  "chart_name": "Gender Distribution",
+  "chart_type": "Group By",
+  "document_type": "Student",
+  "group_by_based_on": "gender",
+  "group_by_type": "Count",
+  "number_of_groups": 5,
+  "type": "Donut",
+  "filters_json": "[[\"Student\", \"enabled\", \"=\", 1, false]]",
+  "dynamic_filters_json": "[]",
+  "is_public": 1,
+  "is_standard": 1,
+  "module": "Junior School Customization",
+  "timeseries": 0,
+  "custom_options": "{\"colors\": [\"#3B82F6\", \"#EC4899\", \"#8B5CF6\"]}"
+}

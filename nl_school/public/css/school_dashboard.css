@@ -1,0 +1,140 @@
+/* Minimal, Native Frappe Styling */
+.school-dashboard-wrapper {
+  padding: var(--padding-md, 15px);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Base Frappe Card */
+.school-dashboard-wrapper .frappe-card {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #d1d8dd);
+  border-radius: var(--border-radius-md, 8px);
+  padding: var(--padding-md, 15px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Typography and Hierarchy */
+.school-dashboard-wrapper .section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 12px;
+}
+
+.school-dashboard-wrapper .dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.school-dashboard-wrapper .dashboard-header h4 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.school-dashboard-wrapper .date-display {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* List Items (Quick Actions, Activity, Alerts) */
+.school-dashboard-wrapper .list-group-wrapper {
+  margin: 0 -8px; /* Offset the padding of items to keep text flush with title */
+}
+
+.school-dashboard-wrapper .list-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: var(--border-radius-sm, 6px);
+  transition: background-color 0.2s;
+  text-decoration: none !important;
+  color: var(--text-color);
+  font-size: 13px;
+  gap: 12px;
+}
+
+.school-dashboard-wrapper .list-item:hover {
+  background-color: var(--fg-hover-color, #f3f3f3);
+}
+
+.school-dashboard-wrapper .list-item-icon {
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.school-dashboard-wrapper .list-item .d-flex.align-items-center {
+  gap: 12px; /* Force gap for items with dots */
+  flex: 1;
+  min-width: 0; /* truncate fix */
+}
+
+/* Chart Container */
+.school-dashboard-wrapper .chart-container {
+  margin: 0 -15px -10px -15px;
+}
+
+/* Activity Dots */
+.school-dashboard-wrapper .activity-dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Empty States */
+.school-dashboard-wrapper .empty-state {
+  text-align: center;
+  padding: 20px 15px;
+  color: var(--text-muted);
+}
+
+/* Fix grid rows for frappe layout wrapper */
+.school-dashboard-wrapper .row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -12px;
+  margin-left: -12px;
+}
+
+.school-dashboard-wrapper [class*="col-"] {
+  position: relative;
+  width: 100%;
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
+/* Responsive columns */
+@media (min-width: 576px) {
+  .school-dashboard-wrapper .col-sm-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (min-width: 992px) {
+  .school-dashboard-wrapper .col-lg-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+}
+
+@media (min-width: 768px) {
+  .school-dashboard-wrapper .col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+  .school-dashboard-wrapper .col-md-8 {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+  }
+}

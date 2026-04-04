@@ -1,4 +1,6 @@
 {
+	"doctype": "Report",
+	"name": "Teacher Timetable",
 	"ref_doctype": "Course Schedule",
 	"report_name": "Teacher Timetable",
 	"report_type": "Script Report",

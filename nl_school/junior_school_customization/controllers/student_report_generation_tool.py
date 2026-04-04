@@ -57,7 +57,6 @@ def prepare_report_card_data(doc):
     averages = calculate_averages(values.get("assessment_result", []))
     exam_types_present = detect_exam_types(values.get("assessment_result", []))
 
-    print(str(get_rubber_stamp(doc.student)))
     return {
         "doc": doc,
         "values": values,
@@ -72,18 +71,23 @@ def prepare_report_card_data(doc):
         "class_teacher": class_teacher,
         "student_image": get_student_image(doc.student),
         "show_levels": True,
-        "show_opener": exam_types_present["Opening Term Assessment"],
-        "show_midterm": exam_types_present["Mid Term Assessment"],
-        "show_endterm": exam_types_present["End Term Assessment"],
+        "show_opener": exam_types_present["Opener Exam"],
+        "show_midterm": exam_types_present["Mid Term"],
+        "show_endterm": exam_types_present["End Term"],
         "date": now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
     }
 
 
 def get_rubber_stamp(student):
-    school = frappe.get_value("Student", student, "company")
-    company = frappe.get_doc("Company", school)
-    rubber_stamp = company.custom_rubber_stamp
-    return rubber_stamp if rubber_stamp else None
+    try:
+        school = frappe.get_value("Student", student, "company")
+        if not school:
+            return None
+        company = frappe.get_doc("Company", school)
+        rubber_stamp = getattr(company, "custom_rubber_stamp", None)
+        return rubber_stamp if rubber_stamp else None
+    except Exception:
+        return None
 
 
 def generate_pdf_response(doc, template_data):
@@ -108,8 +112,15 @@ def process_assessment_results(assessment_results):
         grading_scale = frappe.db.get_value(
             "Assessment Result", result["name"], "grading_scale"
         )
-        grade_info = get_grade(result["total_score"], grading_scale)
-        result["levels"] = grade_info["levels"]
+        maximum_score = frappe.db.get_value(
+            "Assessment Result", result["name"], "maximum_score"
+        )
+        if maximum_score and maximum_score > 0:
+            percentage = (result["total_score"] / maximum_score) * 100
+        else:
+            percentage = result["total_score"]
+        grade_info = get_grade(percentage, grading_scale)
+        result["levels"] = grade_info.get("levels") or result.get("grade") or "-"
         processed_results.append(result)
     return processed_results
 
@@ -117,14 +128,15 @@ def process_assessment_results(assessment_results):
 def detect_exam_types(assessment_results):
     """Determine which exam types are present in the results"""
     exam_types_present = {
-        "Opening Term Assessment": False,
-        "Mid Term Assessment": False,
-        "End Term Assessment": False,
+        "Opener Exam": False,
+        "Mid Term": False,
+        "End Term": False,
     }
 
     for result in assessment_results:
-        if result["assessment_group"] in exam_types_present:
-            exam_types_present[result["assessment_group"]] = True
+        ag = result.get("assessment_group", "")
+        if ag in exam_types_present:
+            exam_types_present[ag] = True
 
     return exam_types_present
 
@@ -134,9 +146,9 @@ def calculate_averages(assessment_result):
     Calculate average scores, grades and levels for assessments
     Returns '-' for both score and levels when no assessments exist for a term
     """
-    opener_scores = []
-    mid_term_scores = []
-    end_term_scores = []
+    opener_percentages = []
+    mid_term_percentages = []
+    end_term_percentages = []
     grading_scale = ""
 
     for result in assessment_result:
@@ -145,45 +157,54 @@ def calculate_averages(assessment_result):
                 "Assessment Result", result["name"], "grading_scale"
             )
 
-        if result["assessment_group"] == "Opening Term Assessment":
-            opener_scores.append(result["total_score"])
-        elif result["assessment_group"] == "Mid Term Assessment":
-            mid_term_scores.append(result["total_score"])
-        elif result["assessment_group"] == "End Term Assessment":
-            end_term_scores.append(result["total_score"])
+        maximum_score = frappe.db.get_value(
+            "Assessment Result", result["name"], "maximum_score"
+        )
+        if maximum_score and maximum_score > 0:
+            pct = (result["total_score"] / maximum_score) * 100
+        else:
+            pct = result["total_score"]
+
+        ag = result.get("assessment_group", "")
+        if ag == "Opener Exam":
+            opener_percentages.append(pct)
+        elif ag == "Mid Term":
+            mid_term_percentages.append(pct)
+        elif ag == "End Term":
+            end_term_percentages.append(pct)
 
     # Default values when no assessments exist
     no_result = {"score": "-", "grade": "-", "levels": "-"}
 
     # Calculate averages only if assessments exist
     opener = no_result
-    if opener_scores:
-        avg_opener = sum(opener_scores) / len(opener_scores)
-        grade_info = get_grade(avg_opener, grading_scale)
+    if opener_percentages:
+        avg = sum(opener_percentages) / len(opener_percentages)
+        grade_info = get_grade(avg, grading_scale)
         opener = {
-            "score": round(avg_opener, 2),
-            "grade": grade_info["grade"],
-            "levels": grade_info["levels"],
+            "score": round(avg, 2),
+            "grade": grade_info.get("grade") or "-",
+            "levels": grade_info.get("levels") or "-",
         }
 
     mid_term = no_result
-    if mid_term_scores:
-        avg_mid_term = sum(mid_term_scores) / len(mid_term_scores)
-        grade_info = get_grade(avg_mid_term, grading_scale)
+    if mid_term_percentages:
+        avg = sum(mid_term_percentages) / len(mid_term_percentages)
+        grade_info = get_grade(avg, grading_scale)
         mid_term = {
-            "score": round(avg_mid_term, 2),
-            "grade": grade_info["grade"],
-            "levels": grade_info["levels"],
+            "score": round(avg, 2),
+            "grade": grade_info.get("grade") or "-",
+            "levels": grade_info.get("levels") or "-",
         }
 
     end_term = no_result
-    if end_term_scores:
-        avg_end_term = sum(end_term_scores) / len(end_term_scores)
-        grade_info = get_grade(avg_end_term, grading_scale)
+    if end_term_percentages:
+        avg = sum(end_term_percentages) / len(end_term_percentages)
+        grade_info = get_grade(avg, grading_scale)
         end_term = {
-            "score": round(avg_end_term, 2),
-            "grade": grade_info["grade"],
-            "levels": grade_info["levels"],
+            "score": round(avg, 2),
+            "grade": grade_info.get("grade") or "-",
+            "levels": grade_info.get("levels") or "-",
         }
 
     return {"opener": opener, "mid_term": mid_term, "end_term": end_term}
@@ -215,16 +236,12 @@ def get_attendance_count(student, academic_year, academic_term=None):
         )
 
     if from_date and to_date:
-        data = frappe.get_all(
-            "Student Attendance",
-            {
-                "student": student,
-                "docstatus": 1,
-                "date": ["between", (from_date, to_date)],
-            },
-            ["status", "count(student) as count"],
-            group_by="status",
-        )
+        data = frappe.db.sql("""
+            SELECT status, COUNT(name) as count
+            FROM `tabStudent Attendance`
+            WHERE student = %s AND docstatus = 1 AND date BETWEEN %s AND %s
+            GROUP BY status
+        """, (student, from_date, to_date), as_dict=True)
 
         for row in data:
             if row.status == "Present":
@@ -234,9 +251,7 @@ def get_attendance_count(student, academic_year, academic_term=None):
             attendance.total += row.count
         return attendance
     else:
-        frappe.throw(
-            _("Please enter the Academic Year and set the Start and End date.")
-        )
+        return attendance
 
 
 def execute(filters=None):

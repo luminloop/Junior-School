@@ -27,11 +27,8 @@ add_to_apps_screen = [
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/nl_school/css/nl_school.css"
+app_include_css = "/assets/nl_school/css/school_dashboard.css"
 # app_include_js = "/assets/nl_school/js/nl_school.js"
-# app_include_js = [
-#     "https://unpkg.com/frappe-charts@1.6.2/dist/frappe-charts.min.iife.js"
-# ]
 
 
 # include js, css files in header of web template

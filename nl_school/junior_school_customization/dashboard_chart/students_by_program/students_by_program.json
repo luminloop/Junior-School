@@ -1,0 +1,18 @@
+{
+  "doctype": "Dashboard Chart",
+  "name": "Students by Program",
+  "chart_name": "Students by Program",
+  "chart_type": "Group By",
+  "document_type": "Program Enrollment",
+  "group_by_based_on": "program",
+  "group_by_type": "Count",
+  "number_of_groups": 10,
+  "type": "Bar",
+  "filters_json": "[]",
+  "dynamic_filters_json": "[]",
+  "is_public": 1,
+  "is_standard": 1,
+  "module": "Junior School Customization",
+  "color": "#3B82F6",
+  "timeseries": 0
+}

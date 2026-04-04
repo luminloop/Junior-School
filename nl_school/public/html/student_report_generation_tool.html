@@ -161,16 +161,16 @@
             <tr>
                 <td>{{ course }}</td>
                 {% if show_opener %}
-                <td>{{ assessments.get("Opening Term Assessment", {}).get("score", "-") }}</td>
-                <td>{{ assessments.get("Opening Term Assessment", {}).get("grade", "-") }}</td>
+                <td>{{ assessments.get("Opener Exam", {}).get("score", "-") }}</td>
+                <td>{{ assessments.get("Opener Exam", {}).get("grade", "-") }}</td>
                 {% endif %}
                 {% if show_midterm %}
-                <td>{{ assessments.get("Mid Term Assessment", {}).get("score", "-") }}</td>
-                <td>{{ assessments.get("Mid Term Assessment", {}).get("grade", "-") }}</td>
+                <td>{{ assessments.get("Mid Term", {}).get("score", "-") }}</td>
+                <td>{{ assessments.get("Mid Term", {}).get("grade", "-") }}</td>
                 {% endif %}
                 {% if show_endterm %}
-                <td>{{ assessments.get("End Term Assessment", {}).get("score", "-") }}</td>
-                <td>{{ assessments.get("End Term Assessment", {}).get("grade", "-") }}</td>
+                <td>{{ assessments.get("End Term", {}).get("score", "-") }}</td>
+                <td>{{ assessments.get("End Term", {}).get("grade", "-") }}</td>
                 {% endif %}
             </tr>
             {% endfor %}

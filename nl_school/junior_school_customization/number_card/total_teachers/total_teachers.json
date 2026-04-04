@@ -1,0 +1,15 @@
+{
+  "doctype": "Number Card",
+  "name": "Total Teachers",
+  "label": "Total Teachers",
+  "document_type": "Instructor",
+  "function": "Count",
+  "filters_json": "[[\"Instructor\", \"status\", \"=\", \"Active\", false]]",
+  "dynamic_filters_json": "[]",
+  "is_public": 1,
+  "is_standard": 1,
+  "module": "Junior School Customization",
+  "show_percentage_stats": 0,
+  "type": "Document Type",
+  "color": "#10B981"
+}
