@@ -639,7 +639,7 @@ def prepare_scheduling_data(teacher_preferences, subject_rules, all_streams):
 
 
 def create_full_schedule(
-    scheduling_data, teacher_prefs, classrooms, school_days, period_slots, school
+    scheduling_data, teacher_prefs, classrooms, school_days, period_slots, school, subject_rules
 ):
     temp_schedule = []
     scheduled_items = []
@@ -650,8 +650,23 @@ def create_full_schedule(
     slot_lookup = {}
     subject_stream_daily = {}
 
-    MAX_LESSONS_PER_DAY = 7
-    MAX_LESSONS_PER_WEEK = 30
+    # Build teacher preferences map for quick lookup
+    teacher_prefs_map = {}
+    for t in teacher_prefs:
+        teacher = t["teacher"]
+        if teacher not in teacher_prefs_map:
+            teacher_prefs_map[teacher] = {
+                "max_period_per_day": t.get("max_period_per_day") or 7,
+                "max_period_per_week": t.get("max_period_per_week") or 35,
+            }
+
+    # Build subject rules map for quick lookup
+    subject_rules_map = {}
+    for s in subject_rules:
+        subject_rules_map[s["subject"]] = {
+            "frequency_per_week": s.get("frequency_per_week", 1),
+            "allow_double": s.get("allow_double", False),
+        }
 
     remaining_items.sort(key=lambda x: -x.get("priority", 1))
 
@@ -664,8 +679,8 @@ def create_full_schedule(
         room_by_subject,
         default_room,
         teacher_workload,
-        MAX_LESSONS_PER_DAY,
-        MAX_LESSONS_PER_WEEK,
+        teacher_prefs_map,
+        subject_rules_map,
         slot_lookup,
         subject_stream_daily,
         temp_schedule,
@@ -682,8 +697,8 @@ def create_full_schedule(
             room_by_subject,
             default_room,
             teacher_workload,
-            MAX_LESSONS_PER_DAY,
-            MAX_LESSONS_PER_WEEK,
+            teacher_prefs_map,
+            subject_rules_map,
             slot_lookup,
             subject_stream_daily,
             temp_schedule,
@@ -700,16 +715,17 @@ def create_full_schedule(
             room_by_subject,
             default_room,
             teacher_workload,
-            MAX_LESSONS_PER_DAY,
+            teacher_prefs_map,
+            subject_rules_map,
             slot_lookup,
             subject_stream_daily,
             temp_schedule,
             scheduled_items,
         )
 
-    # Generate reports
-    workload_report = generate_workload_report(
-        teacher_workload, MAX_LESSONS_PER_DAY, MAX_LESSONS_PER_WEEK
+    # Generate reports using individual teacher limits for validation
+    workload_report = generate_workload_report_individual(
+        teacher_workload, teacher_prefs_map
     )
     subject_distribution = generate_subject_distribution(subject_stream_daily)
     print("Workload Report:", workload_report)
@@ -725,8 +741,8 @@ def first_pass(
     room_by_subject,
     default_room,
     teacher_workload,
-    max_daily,
-    max_weekly,
+    teacher_prefs_map,
+    subject_rules_map,
     slot_lookup,
     subject_stream_daily,
     temp_schedule,
@@ -746,51 +762,56 @@ def first_pass(
             for item in current_items:
                 subject = item["subject"]
                 stream = item["stream"]
+                allow_double = item.get("allow_double", False)
 
                 # Check stream in period
                 if (day_str, period_index, "stream", stream) in slot_lookup:
                     continue
 
-                # Check subject-stream daily limit
-                if subject_stream_daily.get((day_str, subject, stream), 0) >= 1:
+                # Check subject-stream daily limit (allow 2 if allow_double is True)
+                max_per_day = 2 if allow_double else 1
+                if subject_stream_daily.get((day_str, subject, stream), 0) >= max_per_day:
                     continue
 
-                    # Try all teachers
-                    for teacher_data in item["teachers"]:
-                        teacher = teacher_data["teacher"]
-                        teacher_subject = teacher_data["subject"]
-                        teacher_stream = teacher_data["stream"]
-                        preferred_days = teacher_data.get("preferred_days", "")
+                # Try all teachers
+                scheduled = False
+                for teacher_data in item["teachers"]:
+                    teacher = teacher_data["teacher"]
+                    teacher_subject = teacher_data["subject"]
+                    teacher_stream = teacher_data["stream"]
+                    preferred_days = teacher_data.get("preferred_days", "")
 
-                        # Verify teacher match
-                        if teacher_subject != subject or teacher_stream != stream:
-                            continue
+                    # Verify teacher match
+                    if teacher_subject != subject or teacher_stream != stream:
+                        continue
 
-                        # Check teacher in period
-                        if (day_str, period_index, "teacher", teacher) in slot_lookup:
-                            continue
+                    # Check teacher in period
+                    if (day_str, period_index, "teacher", teacher) in slot_lookup:
+                        continue
 
-                        # Check workload
-                        if (
-                            teacher_workload[teacher]["daily"][day_str] >= max_daily
-                            or teacher_workload[teacher]["total"] >= max_weekly
-                        ):
+                    # Get individual teacher limits from preferences
+                    t_prefs = teacher_prefs_map.get(teacher, {})
+                    max_daily = t_prefs.get("max_period_per_day") or 7
+                    max_weekly = t_prefs.get("max_period_per_week") or 35
+
+                    # Check workload
+                    if (
+                        teacher_workload[teacher]["daily"][day_str] >= max_daily
+                        or teacher_workload[teacher]["total"] >= max_weekly
+                    ):
+                        continue
+
+                    # Check preferred days (if specified)
+                    if preferred_days:
+                        day_obj = datetime.strptime(day_str, "%Y-%m-%d")
+                        day_name = day_obj.strftime("%A")  # Monday, Tuesday, etc.
+                        if day_name not in preferred_days:
                             continue
-                            
-                        # Check preferred days (if specified)
-                        if preferred_days:
-                            # Convert day_str (YYYY-MM-DD) to day name
-                            from datetime import datetime
-                            day_obj = datetime.strptime(day_str, "%Y-%m-%d")
-                            day_name = day_obj.strftime("%A")  # Monday, Tuesday, etc.
-                            if day_name not in preferred_days:
-                                continue
 
                     # Get subject-specific rooms
                     available_rooms = room_by_subject.get(subject, [default_room])
 
                     # Try each room
-                    scheduled = False
                     for room in available_rooms:
                         if (day_str, period_index, "room", room) in slot_lookup:
                             continue
@@ -819,6 +840,9 @@ def first_pass(
                     if scheduled:
                         break
 
+                if scheduled:
+                    break
+
 
 def second_pass(
     school,
@@ -828,8 +852,8 @@ def second_pass(
     room_by_subject,
     default_room,
     teacher_workload,
-    max_daily,
-    max_weekly,
+    teacher_prefs_map,
+    subject_rules_map,
     slot_lookup,
     subject_stream_daily,
     temp_schedule,
@@ -844,22 +868,30 @@ def second_pass(
             for item in current_items:
                 subject = item["subject"]
                 stream = item["stream"]
+                allow_double = item.get("allow_double", False)
 
                 # Check stream in period
                 if (day_str, period_index, "stream", stream) in slot_lookup:
                     continue
 
-                # Check subject-stream daily limit
-                if subject_stream_daily.get((day_str, subject, stream), 0) >= 1:
+                # Check subject-stream daily limit (allow 2 if allow_double is True)
+                max_per_day = 2 if allow_double else 1
+                if subject_stream_daily.get((day_str, subject, stream), 0) >= max_per_day:
                     continue
 
                 # Try all teachers
+                scheduled = False
                 for teacher_data in item["teachers"]:
                     teacher = teacher_data["teacher"]
 
                     # Check teacher in period
                     if (day_str, period_index, "teacher", teacher) in slot_lookup:
                         continue
+
+                    # Get individual teacher limits from preferences
+                    t_prefs = teacher_prefs_map.get(teacher, {})
+                    max_daily = t_prefs.get("max_period_per_day") or 7
+                    max_weekly = t_prefs.get("max_period_per_week") or 35
 
                     # Check workload
                     if (
@@ -876,7 +908,6 @@ def second_pass(
                         all_rooms = [default_room]
 
                     # Try each room
-                    scheduled = False
                     for room in all_rooms:
                         if (day_str, period_index, "room", room) in slot_lookup:
                             continue
@@ -905,6 +936,9 @@ def second_pass(
                     if scheduled:
                         break
 
+                if scheduled:
+                    break
+
 
 def third_pass(
     school,
@@ -914,7 +948,8 @@ def third_pass(
     room_by_subject,
     default_room,
     teacher_workload,
-    max_daily,
+    teacher_prefs_map,
+    subject_rules_map,
     slot_lookup,
     subject_stream_daily,
     temp_schedule,
@@ -941,36 +976,41 @@ def third_pass(
             for item in current_items:
                 subject = item["subject"]
                 stream = item["stream"]
+                allow_double = item.get("allow_double", False)
 
                 # Check stream in period
                 if (day_str, period_index, "stream", stream) in slot_lookup:
                     continue
 
-                # Check subject-stream daily limit
-                if subject_stream_daily.get((day_str, subject, stream), 0) >= 1:
+                # Check subject-stream daily limit (allow 2 if allow_double is True)
+                max_per_day = 2 if allow_double else 1
+                if subject_stream_daily.get((day_str, subject, stream), 0) >= max_per_day:
                     continue
 
-                     # Try all teachers
-                    for teacher_data in item["teachers"]:
-                        teacher = teacher_data["teacher"]
-                        preferred_days = teacher_data.get("preferred_days", "")
+                # Try all teachers
+                scheduled = False
+                for teacher_data in item["teachers"]:
+                    teacher = teacher_data["teacher"]
+                    preferred_days = teacher_data.get("preferred_days", "")
 
-                        # Check teacher in period
-                        if (day_str, period_index, "teacher", teacher) in slot_lookup:
-                            continue
+                    # Check teacher in period
+                    if (day_str, period_index, "teacher", teacher) in slot_lookup:
+                        continue
 
-                        # Check only daily workload
-                        if teacher_workload[teacher]["daily"][day_str] >= max_daily:
+                    # Get individual teacher limits from preferences
+                    t_prefs = teacher_prefs_map.get(teacher, {})
+                    max_daily = t_prefs.get("max_period_per_day") or 7
+
+                    # Check only daily workload
+                    if teacher_workload[teacher]["daily"][day_str] >= max_daily:
+                        continue
+
+                    # Check preferred days (if specified)
+                    if preferred_days:
+                        day_obj = datetime.strptime(day_str, "%Y-%m-%d")
+                        day_name = day_obj.strftime("%A")  # Monday, Tuesday, etc.
+                        if day_name not in preferred_days:
                             continue
-                            
-                        # Check preferred days (if specified)
-                        if preferred_days:
-                            # Convert day_str (YYYY-MM-DD) to day name
-                            from datetime import datetime
-                            day_obj = datetime.strptime(day_str, "%Y-%m-%d")
-                            day_name = day_obj.strftime("%A")  # Monday, Tuesday, etc.
-                            if day_name not in preferred_days:
-                                continue
 
                     # Find any available room
                     room = default_room
@@ -997,6 +1037,10 @@ def third_pass(
                     )
 
                     remaining_items.remove(item)
+                    scheduled = True
+                    break
+
+                if scheduled:
                     break
 
 
@@ -1066,6 +1110,26 @@ def generate_workload_report(teacher_workload, max_daily, max_weekly):
         report[teacher] = {
             "total_lessons": data["total"],
             "daily_lessons": data["daily"],
+            "within_limits": (
+                data["total"] <= max_weekly
+                and all(count <= max_daily for count in data["daily"].values())
+            ),
+        }
+    return report
+
+
+def generate_workload_report_individual(teacher_workload, teacher_prefs_map):
+    """Generate workload report using individual teacher limits."""
+    report = {}
+    for teacher, data in teacher_workload.items():
+        t_prefs = teacher_prefs_map.get(teacher, {})
+        max_daily = t_prefs.get("max_period_per_day") or 7
+        max_weekly = t_prefs.get("max_period_per_week") or 35
+        report[teacher] = {
+            "total_lessons": data["total"],
+            "daily_lessons": data["daily"],
+            "max_daily": max_daily,
+            "max_weekly": max_weekly,
             "within_limits": (
                 data["total"] <= max_weekly
                 and all(count <= max_daily for count in data["daily"].values())
@@ -1165,6 +1229,7 @@ def generate_initial_schedule(config):
         school_days,
         period_slots,
         school,
+        config["subject_rules"],
     )
 
     return {
