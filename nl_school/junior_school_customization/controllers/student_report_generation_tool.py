@@ -106,7 +106,7 @@ def generate_pdf_response(doc, template_data):
 
 
 def process_assessment_results(assessment_results):
-    """Add levels to assessment results"""
+    """Add levels and percentage to assessment results"""
     processed_results = []
     for result in assessment_results:
         grading_scale = frappe.db.get_value(
@@ -121,6 +121,7 @@ def process_assessment_results(assessment_results):
             percentage = result["total_score"]
         grade_info = get_grade(percentage, grading_scale)
         result["levels"] = grade_info.get("levels") or result.get("grade") or "-"
+        result["percentage"] = round(percentage, 1)  # Add percentage for chart
         processed_results.append(result)
     return processed_results
 
