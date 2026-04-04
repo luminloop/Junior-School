@@ -131,7 +131,7 @@ class CoordinatorDashboard {
                     <span class="badge badge-warning ml-2" style="font-size: 10px;">${this.data.pending_approvals.length}</span>
                   ` : ""}
                 </div>
-                <a href="/app/assessment-result?workflow_state=Pending+Approval" class="text-muted text-decoration-none" style="font-size: 12px;">${__("View All")}</a>
+                <a href="/desk/assessment-result?workflow_state=Pending+Approval" class="text-muted text-decoration-none" style="font-size: 12px;">${__("View All")}</a>
               </div>
               ${this.render_pending_approvals()}
             </div>
@@ -140,7 +140,7 @@ class CoordinatorDashboard {
             <div class="frappe-card mb-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="section-title mb-0">${__("Teacher Workload")}</div>
-                <a href="/app/instructor" class="text-muted text-decoration-none" style="font-size: 12px;">${__("View All")}</a>
+                <a href="/desk/instructor" class="text-muted text-decoration-none" style="font-size: 12px;">${__("View All")}</a>
               </div>
               ${this.render_teacher_summary()}
             </div>
@@ -230,12 +230,12 @@ class CoordinatorDashboard {
           <tbody>
             ${approvals.slice(0, 8).map(app => `
               <tr>
-                <td><a href="/app/assessment-result/${app.name}">${app.student_name}</a></td>
+                <td><a href="/desk/assessment-result/${app.name}">${app.student_name}</a></td>
                 <td class="text-muted">${app.course || '-'}</td>
                 <td>${app.total_score || '-'} ${app.grade ? `(${app.grade})` : ''}</td>
                 <td class="text-muted">${app.submitted_by || '-'}</td>
                 <td style="text-align: right;">
-                  <a href="/app/assessment-result/${app.name}" class="btn btn-xs btn-primary">
+                  <a href="/desk/assessment-result/${app.name}" class="btn btn-xs btn-primary">
                     ${__("Review")}
                   </a>
                 </td>
@@ -275,7 +275,7 @@ class CoordinatorDashboard {
           <tbody>
             ${teachers.map(t => `
               <tr>
-                <td><a href="/app/instructor/${t.name}">${t.instructor_name}</a></td>
+                <td><a href="/desk/instructor/${t.name}">${t.instructor_name}</a></td>
                 <td style="text-align: center;">${t.class_count || 0}</td>
                 <td style="text-align: center;">
                   ${t.pending_approvals > 0 ? `
@@ -297,12 +297,12 @@ class CoordinatorDashboard {
 
   render_quick_actions() {
     const actions = [
-      { label: "Review Pending Results", route: "/app/assessment-result?workflow_state=Pending+Approval", icon: "tick" },
-      { label: "View All Results", route: "/app/assessment-result", icon: "chart" },
-      { label: "Generate Report Cards", route: "/app/student-report-generation-tool", icon: "file-text" },
-      { label: "Batch Print Reports", route: "/app/batch-report-card", icon: "printer" },
-      { label: "Send Grade Alerts", route: "/app/grade-notification-tool", icon: "send" },
-      { label: "View Teachers", route: "/app/instructor", icon: "users" },
+      { label: "Review Pending Results", route: "/desk/assessment-result?workflow_state=Pending+Approval", icon: "tick" },
+      { label: "View All Results", route: "/desk/assessment-result", icon: "chart" },
+      { label: "Generate Report Cards", route: "/desk/student-report-generation-tool", icon: "file-text" },
+      { label: "Batch Print Reports", route: "/desk/batch-report-card", icon: "printer" },
+      { label: "Send Grade Alerts", route: "/desk/grade-notification-tool", icon: "send" },
+      { label: "View Teachers", route: "/desk/instructor", icon: "users" },
     ];
 
     return `

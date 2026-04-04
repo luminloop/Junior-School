@@ -147,7 +147,7 @@ class TeacherDashboard {
             <div class="frappe-card mb-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="section-title mb-0">${__("My Classes")}</div>
-                <a href="/app/student-group" class="text-muted text-decoration-none" style="font-size: 12px;">${__("View All")}</a>
+                <a href="/desk/student-group" class="text-muted text-decoration-none" style="font-size: 12px;">${__("View All")}</a>
               </div>
               ${this.render_my_classes()}
             </div>
@@ -246,11 +246,11 @@ class TeacherDashboard {
           <tbody>
             ${classes.slice(0, 5).map(cls => `
               <tr>
-                <td><a href="/app/student-group/${cls.name}">${cls.student_group_name}</a></td>
+                <td><a href="/desk/student-group/${cls.name}">${cls.student_group_name}</a></td>
                 <td class="text-muted">${cls.program || '-'}</td>
                 <td style="text-align: right;">${cls.student_count || 0}</td>
                 <td style="text-align: right;">
-                  <a href="/app/enhanced-student-attendance-tool?student_group=${cls.name}" class="btn btn-xs btn-default" title="${__("Mark Attendance")}">
+                  <a href="/desk/enhanced-student-attendance-tool?student_group=${cls.name}" class="btn btn-xs btn-default" title="${__("Mark Attendance")}">
                     ${frappe.utils.icon("tick", "xs")}
                   </a>
                 </td>
@@ -264,11 +264,11 @@ class TeacherDashboard {
 
   render_quick_actions() {
     const actions = [
-      { label: "Mark Attendance", route: "/app/enhanced-student-attendance-tool", icon: "tick" },
-      { label: "Enter Marks", route: "/app/assessment-result/new", icon: "edit" },
-      { label: "Bulk Enter Marks", route: "/app/assessment-result-tool", icon: "list" },
-      { label: "View Schedule", route: "/app/course-schedule", icon: "calendar" },
-      { label: "Student Logs", route: "/app/student-log", icon: "file-text" },
+      { label: "Mark Attendance", route: "/desk/enhanced-student-attendance-tool", icon: "tick" },
+      { label: "Enter Marks", route: "/desk/assessment-result/new", icon: "edit" },
+      { label: "Bulk Enter Marks", route: "/desk/assessment-result-tool", icon: "list" },
+      { label: "View Schedule", route: "/desk/course-schedule", icon: "calendar" },
+      { label: "Student Logs", route: "/desk/student-log", icon: "file-text" },
     ];
 
     return `
@@ -302,7 +302,7 @@ class TeacherDashboard {
     return `
       <div class="d-flex flex-column list-group-wrapper">
         ${assessments.map(assessment => `
-          <a href="/app/assessment-plan/${assessment.name}" class="list-item text-decoration-none">
+          <a href="/desk/assessment-plan/${assessment.name}" class="list-item text-decoration-none">
             <span class="list-item-icon" style="color: var(--blue-500);">
               ${frappe.utils.icon("calendar", "sm")}
             </span>
@@ -336,7 +336,7 @@ class TeacherDashboard {
           const state_color = result.workflow_state === 'Pending Approval' ? 'var(--orange-500)' : 'var(--gray-500)';
           const state_icon = result.workflow_state === 'Pending Approval' ? 'time' : 'edit';
           return `
-            <a href="/app/assessment-result/${result.name}" class="list-item text-decoration-none">
+            <a href="/desk/assessment-result/${result.name}" class="list-item text-decoration-none">
               <span class="list-item-icon" style="color: ${state_color};">
                 ${frappe.utils.icon(state_icon, "sm")}
               </span>
