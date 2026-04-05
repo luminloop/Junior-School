@@ -5,31 +5,6 @@ import frappe
 from frappe.utils import fmt_money, format_date, format_datetime, pretty_date
 
 
-def jinja_methods():
-    """
-    Custom Jinja methods available in email templates and print formats.
-    """
-    return {
-        "get_school_info": get_school_info,
-        "get_student_guardians": get_student_guardians,
-        "get_student_name": get_student_name,
-        "get_guardian_name": get_guardian_name,
-    }
-
-
-def jinja_filters():
-    """
-    Custom Jinja filters available in email templates and print formats.
-    """
-    return {
-        "format_money": format_money_filter,
-        "format_date": format_date_filter,
-        "format_datetime": format_datetime_filter,
-        "pretty_date": pretty_date_filter,
-        "to_json": to_json_filter,
-    }
-
-
 def get_school_info():
     """Get school branding info for templates."""
     settings = frappe.get_doc("Education Settings")
@@ -123,3 +98,20 @@ def to_json_filter(obj):
         return json.dumps(obj, default=str)
     except Exception:
         return ""
+
+
+# Module-level dicts for Frappe jinja hook
+jinja_methods = {
+    "get_school_info": get_school_info,
+    "get_student_guardians": get_student_guardians,
+    "get_student_name": get_student_name,
+    "get_guardian_name": get_guardian_name,
+}
+
+jinja_filters = {
+    "format_money": format_money_filter,
+    "format_date": format_date_filter,
+    "format_datetime": format_datetime_filter,
+    "pretty_date": pretty_date_filter,
+    "to_json": to_json_filter,
+}

@@ -99,8 +99,8 @@ doctype_calendar_js = {"Course Schedule": "public/js/course_schedule_calendar.js
 
 # add methods and filters to jinja environment
 jinja = {
-	"methods": "nl_school.junior_school_customization.email_utils.jinja_methods",
-	"filters": "nl_school.junior_school_customization.email_utils.jinja_filters"
+	"methods": "nl_school.junior_school_customization.email_utils.jinja.jinja_methods",
+	"filters": "nl_school.junior_school_customization.email_utils.jinja.jinja_filters"
 }
 
 # Installation
