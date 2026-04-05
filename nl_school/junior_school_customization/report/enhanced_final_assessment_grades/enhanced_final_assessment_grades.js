@@ -44,7 +44,6 @@ frappe.query_reports["Enhanced Final Assessment Grades"] = {
         return {
           filters: {
             group_based_on: "Batch",
-            company: frappe.query_report.get_filter_value("company"),
             academic_year:
               frappe.query_report.get_filter_value("academic_year"),
           },
