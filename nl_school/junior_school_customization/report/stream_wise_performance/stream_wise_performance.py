@@ -152,8 +152,6 @@ def get_conditions(filters: dict) -> dict:
     conditions = {}
     if not filters:
         return {}
-    if filters.get("company"):
-        conditions["company"] = filters["company"]
     if filters.get("academic_year"):
         conditions["academic_year"] = filters["academic_year"]
     if filters.get("academic_term"):
