@@ -41,17 +41,19 @@ def get_data(filters) -> list[dict]:
             AssessmentResult.student_group.as_("stream"),
             percentage_expr.as_("average_percentage"),
         )
-        .where(
-            AssessmentResult.total_score.isnotnull(),
-            AssessmentResult.maximum_score.isnotnull(),
-            AssessmentResult.maximum_score != 0,
-            *conditions,
-        )
-        .groupby(AssessmentResult.student_group)
-        .orderby(AssessmentResult.student_group)
+        .where(AssessmentResult.total_score.isnotnull())
+        .where(AssessmentResult.maximum_score.isnotnull())
+        .where(AssessmentResult.maximum_score != 0)
     )
 
-    results = frappe.qb.run(query)
+    for condition in conditions:
+        query = query.where(condition)
+
+    query = query.groupby(AssessmentResult.student_group).orderby(
+        AssessmentResult.student_group
+    )
+
+    results = query.run(as_list=True)
     return [{"stream": row[0], "average_percentage": row[1]} for row in results]
 
 
@@ -83,7 +85,5 @@ def get_conditions(filters, AssessmentResult):
         conditions.append(AssessmentResult.academic_year == filters["academic_year"])
     if filters.get("academic_term"):
         conditions.append(AssessmentResult.academic_term == filters["academic_term"])
-    if filters.get("school"):
-        conditions.append(AssessmentResult.company == filters["school"])
 
     return conditions

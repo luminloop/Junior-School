@@ -57,7 +57,6 @@ def get_columns():
 def get_data(filters):
     compare_term = filters.get("compare_term")
     current_term = filters.get("current_term")
-    company = filters.get("company")
     academic_year = filters.get("current_year")
 
     if not compare_term or not current_term:
@@ -75,18 +74,16 @@ def get_data(filters):
             Avg(AssessmentResult.total_score).as_("avg_score"),
         )
         .where(AssessmentResult.academic_term.isin([compare_term, current_term]))
-        .groupby(
-            AssessmentResult.student,
-            AssessmentResult.student_group,
-            AssessmentResult.academic_term,
-        )
     )
-
-    if company:
-        query = query.where(AssessmentResult.company == company)
 
     if academic_year:
         query = query.where(AssessmentResult.academic_year == academic_year)
+
+    query = query.groupby(
+        AssessmentResult.student,
+        AssessmentResult.student_group,
+        AssessmentResult.academic_term,
+    )
 
     results = query.run(as_dict=True)
 
