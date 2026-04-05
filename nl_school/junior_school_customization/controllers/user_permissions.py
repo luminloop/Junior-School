@@ -124,6 +124,8 @@ def setup_instructor_user_on_create(doc, method=None):
     frappe.db.commit()
 
 
+@frappe.whitelist()
+@frappe.whitelist()
 def get_instructor_student_groups(user=None):
     """
     Get list of student groups assigned to the current instructor.
@@ -131,42 +133,42 @@ def get_instructor_student_groups(user=None):
     """
     if not user:
         user = frappe.session.user
-    
-    # Find instructor for this user
-    employee = frappe.db.get_value("User", user, "name")  # Get linked employee
+
+    # Find employee linked to this user
     employees = frappe.get_all("Employee", filters={"user_id": user}, pluck="name")
-    
+
     if not employees:
         return []
-    
+
     instructors = frappe.get_all("Instructor", filters={"employee": ["in", employees]}, pluck="name")
-    
+
     if not instructors:
         return []
-    
+
     # Get student groups where this instructor is assigned
     student_groups = frappe.get_all(
         "Student Group Instructor",
         filters={"instructor": ["in", instructors]},
         pluck="parent"
     )
-    
+
     return list(set(student_groups))
 
 
+@frappe.whitelist()
 def get_instructor_students(user=None):
     """
     Get list of students in the student groups assigned to the current instructor.
     """
     student_groups = get_instructor_student_groups(user)
-    
+
     if not student_groups:
         return []
-    
+
     students = frappe.get_all(
         "Student Group Student",
         filters={"parent": ["in", student_groups], "active": 1},
         pluck="student"
     )
-    
+
     return list(set(students))

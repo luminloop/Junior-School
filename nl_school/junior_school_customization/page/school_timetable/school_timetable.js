@@ -128,6 +128,27 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
   let allStreams = [];
   let allRooms = [];
   let isNewSchedule = false;
+  let isTeacherView = false;
+  let teacherStudentGroups = [];
+
+  // Check if current user is an Instructor (teacher view = read-only)
+  if (frappe.user.has_role("Instructor") && !frappe.user.has_role("Academic Coordinator") && !frappe.user.has_role("Principal")) {
+    isTeacherView = true;
+    // Fetch this teacher's student groups and auto-filter
+    frappe.call({
+      method: "nl_school.junior_school_customization.controllers.user_permissions.get_instructor_student_groups",
+      callback: function (r) {
+        if (r.message && r.message.length > 0) {
+          teacherStudentGroups = r.message;
+          // Auto-filter calendar to teacher's classes
+          selectedFilter = "stream";
+          selectedValue = teacherStudentGroups[0];
+          $("#stream-dropdown").val(selectedValue);
+          render_calendar(selectedFilter, selectedValue);
+        }
+      }
+    });
+  }
 
   let customStyles = document.createElement("style");
   customStyles.innerHTML = `
@@ -276,6 +297,12 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
     `;
   document.head.appendChild(customStyles);
 
+  // Hide teacher dropdown and print button for teachers (auto-filtered)
+  if (isTeacherView) {
+    $("#teacher-dropdown").closest(".form-group").hide();
+    $(".print-btn-wrapper").hide();
+  }
+
   // Fetch teachers and populate dropdown
   frappe.call({
     method:
@@ -330,7 +357,7 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
     },
   });
 
-  //fetch courses
+  // Fetch courses
   frappe.call({
     method:
       "nl_school.junior_school_customization.page.school_timetable.timetable.get_courses",
@@ -345,6 +372,11 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
       });
     },
   });
+
+  // Render calendar for non-teacher views (teacher view renders after fetching student groups)
+  if (!isTeacherView) {
+    render_calendar();
+  }
 
   function render_calendar(filter_by = null, filter_value = "") {
     let calendarEl = document.getElementById("calendar");
@@ -369,21 +401,33 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
       slotMaxTime: "18:00:00",
       allDaySlot: false,
       nowIndicator: true,
-      editable: true,
+      editable: !isTeacherView,
       // Responsive height
       height: isMobile ? "auto" : null,
       expandRows: !isMobile,
       eventClick: function (info) {
-        openEditModal(info.event.id);
+        if (!isTeacherView) {
+          openEditModal(info.event.id);
+        }
       },
       dateClick: function (info) {
-        openCreateModal(info.date);
+        if (!isTeacherView) {
+          openCreateModal(info.date);
+        }
       },
       eventDrop: function (info) {
-        updateEventTime(info.event);
+        if (!isTeacherView) {
+          updateEventTime(info.event);
+        } else {
+          calendar.refetchEvents();
+        }
       },
       eventResize: function (info) {
-        updateEventTime(info.event);
+        if (!isTeacherView) {
+          updateEventTime(info.event);
+        } else {
+          calendar.refetchEvents();
+        }
       },
       events: function (fetchInfo, successCallback, failureCallback) {
         frappe.call({
@@ -531,6 +575,10 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
 
   // Save schedule changes or create new
   $("#save-schedule").on("click", function () {
+    if (isTeacherView) {
+      frappe.msgprint(__("Teachers cannot edit the timetable. Please contact the Academic Coordinator."));
+      return;
+    }
     const scheduleId = $("#schedule-id").val();
     const course = $("#edit-course").val();
     const instructor = $("#edit-instructor").val();
