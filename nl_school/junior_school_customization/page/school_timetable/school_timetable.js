@@ -708,43 +708,29 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
 
         let weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-        // Pre-Primary time slots
-        let prePrimaryTimeSlots = [
-          { start: "7:40 AM", end: "8:15 AM", label: "Breakfast" },
-          { start: "8:15 AM", end: "9:00 AM" },
-          { start: "9:00 AM", end: "9:45 AM" },
-          { start: "9:45 AM", end: "10:30 AM", label: "First Break" },
-          { start: "10:30 AM", end: "11:15 AM" },
-          { start: "11:15 AM", end: "11:30 AM" },
-          { start: "11:30 AM", end: "11:45 AM", label: "Second Break" },
-          { start: "11:45 AM", end: "12:30 PM" },
-          { start: "12:30 PM", end: "1:20 PM", label: "Lunch" },
-          { start: "1:20 PM", end: "2:15 PM" },
-          { start: "2:15 PM", end: "3:00 PM" },
-        ];
-
-        let primaryTimeSlots = [
-          { start: "6:45 AM", end: "7:40 AM" },
-          { start: "7:40 AM", end: "8:10 AM", label: "Breakfast" },
-          { start: "8:10 AM", end: "8:55 AM" },
-          { start: "8:55 AM", end: "9:40 AM" },
-          { start: "9:40 AM", end: "9:50 AM", label: "First Break" },
-          { start: "9:50 AM", end: "10:35 AM" },
-          { start: "10:35 AM", end: "11:20 AM" },
-          { start: "11:20 AM", end: "11:30 AM", label: "Second Break" },
-          { start: "11:30 AM", end: "12:15 PM" },
-          { start: "12:15 PM", end: "1:00 PM" },
-          { start: "1:00 PM", end: "1:45 PM", label: "Lunch" },
-          { start: "1:45 PM", end: "1:55 PM" },
-          { start: "1:55 PM", end: "2:40 PM" },
-          { start: "2:40 PM", end: "3:25 PM" },
-          { start: "3:25 PM", end: "4:10 PM" },
-        ];
-
-        let timeSlots =
-          selectedLevel === "pre-primary"
-            ? prePrimaryTimeSlots
-            : primaryTimeSlots;
+        // Dynamically extract unique time slots from actual schedule data
+        let uniqueTimes = new Set();
+        schedules.forEach(schedule => {
+          uniqueTimes.add(schedule.from_time);
+        });
+        
+        // Sort times
+        let sortedTimes = Array.from(uniqueTimes).sort();
+        
+        // Build time slots with start and end times
+        let timeSlots = [];
+        sortedTimes.forEach((time, idx) => {
+          let endTime = idx < sortedTimes.length - 1 ? sortedTimes[idx + 1] : null;
+          // Find the actual end time from schedule data
+          let matchingSchedule = schedules.find(s => s.from_time === time);
+          if (matchingSchedule && matchingSchedule.to_time) {
+            endTime = matchingSchedule.to_time;
+          }
+          timeSlots.push({
+            start: time,
+            end: endTime || "N/A",
+          });
+        });
 
         let showInstructor = filter_type === "stream";
         let showStudentGroup = filter_type === "instructor";
@@ -767,7 +753,7 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
                                   .map(
                                     (slot) => `
                                     <th style="width: 150px; min-height: 80px; text-align: center; vertical-align: middle; font-size: 12px; font-weight: normal;">
-                                        ${slot.label ? `${removeAMPM(slot.start)} - ${removeAMPM(slot.end)}<br>(${slot.label})` : `${slot.start} - ${slot.end}`}
+                                        ${formatTime(slot.start)} - ${formatTime(slot.end)}
                                     </th>`,
                                   )
                                   .join("")}
@@ -780,19 +766,12 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
           tableHTML += `<tr><td>${day}</td>`;
 
           timeSlots.forEach((slot) => {
-            // Check if this slot is a predefined break or meal time
-            if (slot.label) {
-              tableHTML += `<td class="text-center" style="background-color: #f8d7da; font-size: 12px;">${slot.label}</td>`;
-              return;
-            }
-
             let matchedSchedule = schedules.find((schedule) => {
               let scheduleDay = new Date(schedule.schedule_date)
                 .toLocaleDateString("en-US", { weekday: "long" })
                 .trim();
-              let scheduleTime = convertTo12HourFormat(schedule.from_time);
 
-              return scheduleDay === day && scheduleTime === slot.start;
+              return scheduleDay === day && schedule.from_time === slot.start;
             });
 
             if (matchedSchedule) {
@@ -825,17 +804,12 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
     });
   }
 
-  // Function to remove AM/PM from time labels
-  function removeAMPM(timeString) {
-    return timeString.replace(/\s?(AM|PM)/g, "");
-  }
-
-  // Function to convert time to 12-hour format
-  function convertTo12HourFormat(timeString) {
-    let timeParts = timeString.split(":");
-    let hours = parseInt(timeParts[0], 10);
-    let minutes = timeParts.length > 1 ? timeParts[1] : "00";
-
+  // Function to format time from HH:MM:SS to readable format
+  function formatTime(timeString) {
+    if (!timeString) return "";
+    let parts = timeString.split(":");
+    let hours = parseInt(parts[0], 10);
+    let minutes = parts[1] || "00";
     let period = hours >= 12 ? "PM" : "AM";
     hours = hours % 12 || 12;
     return `${hours}:${minutes} ${period}`;
@@ -844,25 +818,33 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
   // Print function
   function printTimetable() {
     let printContent = document.getElementById("printable-timetable").innerHTML;
-    let newWindow = window.open("", "", "width=1000,height=800");
+    let newWindow = window.open("", "", "width=1200,height=800");
     newWindow.document.write(`
             <html>
             <head>
                 <title>School Timetable</title>
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
                 <style>
+                    body { padding: 20px; }
+                    h3 { margin-bottom: 20px; }
+                    .table th, .table td {
+                        padding: 8px;
+                        border: 1px solid #ddd;
+                        text-align: center;
+                        vertical-align: middle;
+                    }
+                    table {
+                        width: 100% !important;
+                        table-layout: fixed;
+                    }
+                    th, td {
+                        font-size: 11px;
+                    }
                     @media print {
+                        body { padding: 0; }
                         .table th, .table td {
-                            padding: 8px;
-                            border: 1px solid #ddd;
-                        }
-                        table {
-                            width: 100% !important;
-                            table-layout: fixed;
-                        }
-                        th, td {
+                            padding: 4px;
                             font-size: 10px;
-                            padding: 4px !important;
                         }
                     }
                 </style>
@@ -873,6 +855,10 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
             </html>
         `);
     newWindow.document.close();
-    newWindow.print();
+    newWindow.focus();
+    setTimeout(function() {
+      newWindow.print();
+      newWindow.close();
+    }, 500);
   }
 };

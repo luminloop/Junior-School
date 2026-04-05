@@ -218,7 +218,9 @@ def get_grade(score, grading_scale):
 
     for interval in sorted(grading_intervals, key=lambda x: x.threshold, reverse=True):
         if score >= interval.threshold:
-            return {"grade": interval.grade_code, "levels": interval.custom_levels}
+            # Use grade_description as levels, fallback to grade_code
+            levels = interval.grade_description or interval.grade_code
+            return {"grade": interval.grade_code, "levels": levels}
 
     return results
 
