@@ -1,0 +1,89 @@
+{% extends "nl_school/templates/emails/base.html" %}
+{% block content %}
+<h1>Overdue Fee Reminder</h1>
+<p class="subtitle">Urgent: Outstanding fees for {{ student_name }}</p>
+
+<div class="status-banner status-danger">
+    <h3>Payment Overdue</h3>
+    <p>The fee payment for {{ student_name }} is now {{ days_overdue or "several" }} days overdue.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or "Parent" }},</p>
+
+<p>This is an <strong>important reminder</strong> that the school fees for <strong>{{ student_name }}</strong> are overdue. The payment was due on <strong>{{ due_date }}</strong>.</p>
+
+<div class="info-card" style="background-color: #fef2f2; border-color: #fecaca;">
+    <div class="info-row">
+        <span class="info-label">Student</span>
+        <span class="info-value">{{ student_name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Class</span>
+        <span class="info-value">{{ student_group or program or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Invoice Number</span>
+        <span class="info-value" style="font-family: monospace;">{{ invoice_number or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Due Date</span>
+        <span class="info-value" style="color: #dc2626;">{{ due_date or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Days Overdue</span>
+        <span class="info-value" style="color: #dc2626;">{{ days_overdue or "N/A" }} days</span>
+    </div>
+    <div class="info-row" style="border-bottom: none;">
+        <span class="info-label" style="font-size: 16px; font-weight: 600;">Outstanding Amount</span>
+        <span class="info-value" style="font-size: 20px; color: #dc2626;">{{ currency }} {{ "{:,.2f}".format(outstanding_amount) }}</span>
+    </div>
+</div>
+
+{% if fee_breakdown %}
+<h2 style="font-size: 16px; margin-top: 24px;">Fee Breakdown</h2>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th style="text-align: right;">Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in fee_breakdown %}
+        <tr>
+            <td>{{ item.description }}</td>
+            <td style="text-align: right;">{{ currency }} {{ "{:,.2f}".format(item.amount) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<div class="info-card" style="background-color: #fffbeb; border-color: #fde68a; margin-top: 16px;">
+    <p style="margin: 0; color: #92400e;"><strong>Please Note:</strong> Continued non-payment may result in:</p>
+    <ul style="margin: 8px 0 0 0; color: #92400e; font-size: 13px;">
+        <li>Restriction from attending classes</li>
+        <li>Withholding of report cards and transcripts</li>
+        <li>Exclusion from examinations</li>
+        <li>Additional late payment charges</li>
+    </ul>
+</div>
+
+{% if payment_url %}
+<h2 style="font-size: 16px; margin-top: 24px;">Make Payment Now</h2>
+<p>Please settle the outstanding amount at your earliest convenience to avoid any disruption.</p>
+<a href="{{ payment_url }}" class="cta-button">Pay Now</a>
+{% endif %}
+
+{% if installment_option %}
+<div class="info-card" style="margin-top: 16px;">
+    <p style="margin: 0;"><strong>Need a payment plan?</strong> If you're experiencing financial difficulties, please contact us to discuss a possible installment arrangement. We're here to help.</p>
+</div>
+{% endif %}
+
+<hr class="divider">
+
+<p style="font-size: 13px;">If you have already made this payment, please disregard this notice and send us the payment confirmation at <a href="mailto:{{ company_email or '' }}">{{ company_email or 'the school accounts office' }}</a>.</p>
+
+<p style="font-size: 14px; color: #1a202c;">Regards,<br><strong>{{ school_name }} Accounts Office</strong><br>{{ company_phone or "" }}</p>
+{% endblock %}

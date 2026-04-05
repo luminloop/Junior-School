@@ -1,0 +1,105 @@
+{% extends "nl_school/templates/emails/base.html" %}
+{% block content %}
+<h1>Fee Invoice</h1>
+<p class="subtitle">Fee statement for {{ student_name }} - {{ academic_term or academic_year }}</p>
+
+<div class="status-banner status-info">
+    <h3>Fee Invoice Generated</h3>
+    <p>A new fee invoice has been issued for {{ student_name }}.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or "Parent" }},</p>
+
+<p>Please find below the fee invoice for <strong>{{ student_name }}</strong> for the <strong>{{ academic_term or academic_year or "current period" }}</strong>.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">Student</span>
+        <span class="info-value">{{ student_name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Class</span>
+        <span class="info-value">{{ student_group or program or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Invoice Number</span>
+        <span class="info-value" style="font-family: monospace;">{{ invoice_number or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Invoice Date</span>
+        <span class="info-value">{{ invoice_date or frappe.utils.nowdate() }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Due Date</span>
+        <span class="info-value" style="color: {% if is_overdue %}#dc2626{% else %}#92400e{% endif %};">{{ due_date or "N/A" }}</span>
+    </div>
+</div>
+
+<h2 style="font-size: 16px; margin-top: 24px;">Fee Breakdown</h2>
+
+{% if fee_components %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th style="text-align: right;">Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for component in fee_components %}
+        <tr>
+            <td>{{ component.description }}</td>
+            <td style="text-align: right;">{{ currency }} {{ "{:,.2f}".format(component.amount) }}</td>
+        </tr>
+        {% endfor %}
+        <tr style="background-color: #f8f9fa; font-weight: 600;">
+            <td>Total Fees</td>
+            <td style="text-align: right;">{{ currency }} {{ "{:,.2f}".format(total_amount) }}</td>
+        </tr>
+        {% if discount and discount > 0 %}
+        <tr>
+            <td style="color: #166534;">Discount</td>
+            <td style="text-align: right; color: #166534;">- {{ currency }} {{ "{:,.2f}".format(discount) }}</td>
+        </tr>
+        {% endif %}
+        {% if already_paid and already_paid > 0 %}
+        <tr>
+            <td style="color: #166534;">Already Paid</td>
+            <td style="text-align: right; color: #166534;">- {{ currency }} {{ "{:,.2f}".format(already_paid) }}</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+{% endif %}
+
+<div class="info-card" style="margin-top: 16px;">
+    <div class="info-row">
+        <span class="info-label" style="font-size: 16px; font-weight: 600;">Amount Due</span>
+        <span class="info-value" style="font-size: 20px; color: #0ba4db;">{{ currency }} {{ "{:,.2f}".format(amount_due or total_amount) }}</span>
+    </div>
+</div>
+
+<h2 style="font-size: 16px; margin-top: 24px;">Payment Options</h2>
+<ul style="font-size: 14px; color: #4a5568; line-height: 1.8;">
+    <li><strong>Online Payment:</strong> Pay securely via Paystack using the link below</li>
+    <li><strong>Bank Transfer:</strong> Transfer to the school's bank account (details below)</li>
+    <li><strong>Cash/Cheque:</strong> Pay at the school accounts office</li>
+</ul>
+
+{% if payment_url %}
+<a href="{{ payment_url }}" class="cta-button">Pay Now Online</a>
+{% endif %}
+
+{% if bank_details %}
+<div class="info-card" style="margin-top: 16px;">
+    <p style="margin: 0 0 8px 0; font-weight: 600; font-size: 13px;">Bank Transfer Details:</p>
+    <p style="margin: 0; font-size: 13px; line-height: 1.6;">{{ bank_details }}</p>
+</div>
+{% endif %}
+
+<hr class="divider">
+
+<p style="font-size: 13px;">Please ensure payment is made by the due date to avoid any inconvenience. For any queries about this invoice, contact the accounts office at <a href="mailto:{{ company_email or '' }}">{{ company_email or 'the school accounts office' }}</a>.</p>
+
+<p style="font-size: 14px; color: #1a202c;">Regards,<br><strong>{{ school_name }} Accounts Office</strong></p>
+{% endblock %}

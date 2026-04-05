@@ -1,0 +1,64 @@
+{% extends "nl_school/templates/emails/base.html" %}
+{% block content %}
+<h1>Payment Receipt</h1>
+<p class="subtitle">Your payment has been received successfully</p>
+
+<div class="status-banner status-success">
+    <h3>Payment Confirmed</h3>
+    <p>Thank you! Your payment of {{ currency }} {{ "{:,.2f}".format(amount) }} has been received.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or customer_name or "Parent" }},</p>
+
+<p>We confirm receipt of your payment for <strong>{{ student_name or "your child" }}</strong>'s school fees. Thank you for your prompt payment.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">Transaction ID</span>
+        <span class="info-value" style="font-family: monospace;">{{ transaction_id or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Payment Date</span>
+        <span class="info-value">{{ payment_date or frappe.utils.nowdate() }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Payment Method</span>
+        <span class="info-value">{{ payment_method or "Online Payment" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Invoice Number</span>
+        <span class="info-value">{{ invoice_number or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Amount Paid</span>
+        <span class="info-value" style="color: #166534; font-size: 16px;">{{ currency }} {{ "{:,.2f}".format(amount) }}</span>
+    </div>
+</div>
+
+{% if outstanding_amount and outstanding_amount > 0 %}
+<div class="info-card" style="background-color: #fffbeb; border-color: #fde68a;">
+    <div class="info-row">
+        <span class="info-label" style="color: #92400e;">Outstanding Balance</span>
+        <span class="info-value" style="color: #92400e; font-size: 16px;">{{ currency }} {{ "{:,.2f}".format(outstanding_amount) }}</span>
+    </div>
+</div>
+{% else %}
+<div class="info-card" style="background-color: #f0fdf4; border-color: #bbf7d0;">
+    <p style="margin: 0; color: #166534;"><strong>Account Fully Paid!</strong> All fees for this period have been settled. Thank you!</p>
+</div>
+{% endif %}
+
+{% if receipt_url %}
+<a href="{{ receipt_url }}" class="cta-button">Download Receipt</a>
+{% endif %}
+
+{% if portal_url %}
+<a href="{{ portal_url }}" class="cta-button cta-button-secondary" style="margin-left: 8px;">View Fee Statement</a>
+{% endif %}
+
+<hr class="divider">
+
+<p style="font-size: 13px;">This is an automated payment confirmation. If you have any questions about this payment, please contact the accounts office at <a href="mailto:{{ company_email or '' }}">{{ company_email or 'the school accounts office' }}</a>.</p>
+
+<p style="font-size: 14px; color: #1a202c;">Thank you for your continued support,<br><strong>{{ school_name }} Accounts Office</strong></p>
+{% endblock %}

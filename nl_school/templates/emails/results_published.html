@@ -1,0 +1,96 @@
+{% extends "nl_school/templates/emails/base.html" %}
+{% block content %}
+<h1>Results Published</h1>
+<p class="subtitle">{{ student_name }}'s assessment results are now available</p>
+
+<div class="status-banner status-success">
+    <h3>Results Ready</h3>
+    <p>{{ student_name }}'s {{ academic_term or "assessment" }} results have been published.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or "Parent" }},</p>
+
+<p>We are pleased to inform you that the assessment results for <strong>{{ student_name }}</strong> have been published and are now available for viewing.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">Student</span>
+        <span class="info-value">{{ student_name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Class</span>
+        <span class="info-value">{{ student_group or program or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Assessment</span>
+        <span class="info-value">{{ assessment_name or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Term</span>
+        <span class="info-value">{{ academic_term or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Academic Year</span>
+        <span class="info-value">{{ academic_year or "N/A" }}</span>
+    </div>
+</div>
+
+{% if results_summary %}
+<h2 style="font-size: 16px; margin-top: 24px;">Performance Summary</h2>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Subject</th>
+            <th>Score</th>
+            <th>Grade</th>
+            <th>Rank</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in results_summary %}
+        <tr>
+            <td>{{ result.subject }}</td>
+            <td>{{ result.score }}/{{ result.total }}</td>
+            <td>{{ result.grade }}</td>
+            <td>{{ result.rank or "-" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if overall_average %}
+<div class="info-card" style="margin-top: 16px;">
+    <div class="info-row">
+        <span class="info-label">Overall Average</span>
+        <span class="info-value" style="font-size: 18px; color: {% if overall_average >= 70 %}#166534{% elif overall_average >= 50 %}#92400e{% else %}#991b1b{% endif %};">{{ overall_average }}%</span>
+    </div>
+    {% if class_rank %}
+    <div class="info-row">
+        <span class="info-label">Class Rank</span>
+        <span class="info-value">{{ class_rank }} out of {{ class_total }}</span>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+{% endif %}
+
+{% if report_card_url %}
+<a href="{{ report_card_url }}" class="cta-button">View Full Report Card</a>
+{% endif %}
+
+{% if portal_url %}
+<a href="{{ portal_url }}" class="cta-button cta-button-secondary" style="margin-left: 8px;">Access Portal</a>
+{% endif %}
+
+<hr class="divider">
+
+<h2 style="font-size: 16px;">Parent-Teacher Meeting</h2>
+<p style="font-size: 14px;">{% if meeting_date %}A parent-teacher meeting is scheduled for <strong>{{ meeting_date }}</strong>. We encourage you to attend to discuss {{ student_name }}'s progress.{% else %}If you would like to discuss {{ student_name }}'s performance, please contact the class teacher to schedule a meeting.{% endif %}</p>
+
+<hr class="divider">
+
+<p style="font-size: 13px;">For any questions about the results, please contact the class teacher or the school office at <a href="mailto:{{ company_email or '' }}">{{ company_email or 'the school office' }}</a>.</p>
+
+<p style="font-size: 14px; color: #1a202c;">Best regards,<br><strong>{{ school_name }}</strong></p>
+{% endblock %}

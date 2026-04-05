@@ -98,10 +98,10 @@ doctype_calendar_js = {"Course Schedule": "public/js/course_schedule_calendar.js
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "nl_school.utils.jinja_methods",
-# 	"filters": "nl_school.utils.jinja_filters"
-# }
+jinja = {
+	"methods": "nl_school.junior_school_customization.utils.jinja_methods",
+	"filters": "nl_school.junior_school_customization.utils.jinja_filters"
+}
 
 # Installation
 # ------------
@@ -210,10 +210,17 @@ scheduler_events = {
             "nl_school.junior_school_customization.utils.update_enrollment_tool"
         ],
     },
+    "daily": [
+        "nl_school.junior_school_customization.utils.email_notifications.send_daily_absent_alerts",
+    ],
     "Weekly": [
         "nl_school.junior_school_customization.utils.update_academic_term",
         "nl_school.junior_school_customization.utils.close_assessment_plan",
         "nl_school.junior_school_customization.doctype.fee_notification_tool.fee_notification_tool.send_automated_fee_reminders",
+        "nl_school.junior_school_customization.utils.email_notifications.send_weekly_attendance_warnings",
+    ],
+    "monthly": [
+        "nl_school.junior_school_customization.utils.email_notifications.send_overdue_fee_escalations",
     ],
 }
 

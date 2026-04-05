@@ -1,0 +1,72 @@
+{% extends "nl_school/templates/emails/base.html" %}
+{% block content %}
+<h1>Low Attendance Warning</h1>
+<p class="subtitle">Attendance alert for {{ student_name }}</p>
+
+<div class="status-banner status-danger">
+    <h3>Attendance Below Required Threshold</h3>
+    <p>{{ student_name }}'s attendance has fallen below the minimum required level.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or "Parent" }},</p>
+
+<p>This is an important notification regarding <strong>{{ student_name }}</strong>'s attendance at <strong>{{ school_name }}</strong>.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">Student</span>
+        <span class="info-value">{{ student_name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Class</span>
+        <span class="info-value">{{ student_group or program or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Current Attendance</span>
+        <span class="info-value" style="color: #dc2626;">{{ attendance_percentage }}%</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Minimum Required</span>
+        <span class="info-value">{{ min_required_percentage or "75" }}%</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Days Present</span>
+        <span class="info-value">{{ days_present }} / {{ total_days }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Days Absent</span>
+        <span class="info-value" style="color: #dc2626;">{{ days_absent }}</span>
+    </div>
+</div>
+
+<h2 style="font-size: 16px; margin-top: 24px;">Why This Matters</h2>
+<p>Regular attendance is crucial for:</p>
+<ul style="font-size: 14px; color: #4a5568; line-height: 1.8;">
+    <li>Academic performance and understanding of subjects</li>
+    <li>Participation in class activities and group work</li>
+    <li>Meeting minimum attendance requirements for examinations</li>
+    <li>Building consistent learning habits</li>
+</ul>
+
+<div class="info-card" style="background-color: #fef2f2; border-color: #fecaca;">
+    <p style="margin: 0; color: #991b1b;"><strong>Important:</strong> Students with attendance below {{ min_required_percentage or "75" }}% may not be eligible to sit for examinations.</p>
+</div>
+
+<h2 style="font-size: 16px; margin-top: 24px;">What You Can Do</h2>
+<ol style="font-size: 14px; color: #4a5568; line-height: 1.8;">
+    <li>Ensure {{ student_name }} attends school regularly</li>
+    <li>Submit leave applications in advance for planned absences</li>
+    <li>Inform the school promptly if {{ student_name }} is unwell</li>
+    <li>Schedule medical appointments outside school hours when possible</li>
+</ol>
+
+{% if portal_url %}
+<a href="{{ portal_url }}" class="cta-button">View Full Attendance Report</a>
+{% endif %}
+
+<hr class="divider">
+
+<p style="font-size: 13px;">If there are extenuating circumstances affecting attendance, please contact us at <a href="mailto:{{ company_email or '' }}">{{ company_email or 'the school office' }}</a> or call {{ company_phone or 'the school' }} to discuss.</p>
+
+<p style="font-size: 14px; color: #1a202c;">Best regards,<br><strong>{{ school_name }}</strong></p>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "nl_school/templates/emails/base.html" %}
+{% block content %}
+<h1>Upcoming Exam Reminder</h1>
+<p class="subtitle">Exam schedule notification for {{ student_name }}</p>
+
+<div class="status-banner status-info">
+    <h3>Exam Scheduled</h3>
+    <p>{{ student_name }} has upcoming examinations. Please ensure preparation.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or "Parent" }},</p>
+
+<p>This is a reminder that <strong>{{ student_name }}</strong> has upcoming examinations at <strong>{{ school_name }}</strong>. Please help {{ student_name }} prepare adequately.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">Student</span>
+        <span class="info-value">{{ student_name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Class</span>
+        <span class="info-value">{{ student_group or program or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Assessment</span>
+        <span class="info-value">{{ assessment_name or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Term</span>
+        <span class="info-value">{{ academic_term or "N/A" }}</span>
+    </div>
+</div>
+
+<h2 style="font-size: 16px; margin-top: 24px;">Exam Schedule</h2>
+
+{% if exam_schedule %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Subject</th>
+            <th>Time</th>
+            <th>Room</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for exam in exam_schedule %}
+        <tr>
+            <td>{{ exam.date }}</td>
+            <td>{{ exam.subject }}</td>
+            <td>{{ exam.time or "TBA" }}</td>
+            <td>{{ exam.room or "TBA" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="info-card">
+    <p style="margin: 0;">The detailed exam schedule will be shared soon. Please check the school portal for updates.</p>
+</div>
+{% endif %}
+
+<h2 style="font-size: 16px; margin-top: 24px;">Exam Guidelines</h2>
+<ul style="font-size: 14px; color: #4a5568; line-height: 1.8;">
+    <li>Ensure {{ student_name }} arrives at least 15 minutes before the exam</li>
+    <li>Bring all required stationery and materials</li>
+    <li>Mobile phones and electronic devices are not allowed in the exam room</li>
+    <li>Students who miss an exam without valid reason will not be given a make-up</li>
+</ul>
+
+{% if timetable_url %}
+<a href="{{ timetable_url }}" class="cta-button">View Full Timetable</a>
+{% endif %}
+
+<hr class="divider">
+
+<p style="font-size: 13px;">If {{ student_name }} will be unable to attend any exam due to illness or emergency, please notify the school immediately at <a href="mailto:{{ company_email or '' }}">{{ company_email or 'the school office' }}</a>.</p>
+
+<p style="font-size: 14px; color: #1a202c;">Best wishes for the exams,<br><strong>{{ school_name }}</strong></p>
+{% endblock %}

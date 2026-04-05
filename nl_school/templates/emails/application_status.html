@@ -1,0 +1,111 @@
+{% extends "nl_school/templates/emails/base.html" %}
+{% block content %}
+<h1>Application Status Update</h1>
+<p class="subtitle">Regarding {{ student_name }}'s application to {{ school_name }}</p>
+
+{% if status == "Approved" or status == "Accepted" %}
+<div class="status-banner status-success">
+    <h3>Congratulations! Application Approved</h3>
+    <p>We are pleased to inform you that {{ student_name }}'s application has been accepted.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or "Parent" }},</p>
+
+<p>We are delighted to inform you that <strong>{{ student_name }}</strong> has been accepted to <strong>{{ school_name }}</strong> for the <strong>{{ academic_year or "upcoming" }}</strong> academic year.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">Student</span>
+        <span class="info-value">{{ student_name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Program</span>
+        <span class="info-value">{{ program or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Academic Year</span>
+        <span class="info-value">{{ academic_year or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Status</span>
+        <span class="info-value" style="color: #166534;">Accepted</span>
+    </div>
+</div>
+
+<h2 style="font-size: 16px; margin-top: 24px;">Next Steps</h2>
+<p>To complete the enrollment process, please:</p>
+<ol style="font-size: 14px; color: #4a5568; line-height: 1.8;">
+    <li>Complete the enrollment form</li>
+    <li>Submit required documents</li>
+    <li>Pay the enrollment fee</li>
+    <li>Attend the orientation session</li>
+</ol>
+
+{% if enrollment_url %}
+<a href="{{ enrollment_url }}" class="cta-button">Complete Enrollment</a>
+{% endif %}
+
+{% elif status == "Rejected" or status == "Denied" %}
+<div class="status-banner status-danger">
+    <h3>Application Not Accepted</h3>
+    <p>We regret to inform you about the decision regarding {{ student_name }}'s application.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or "Parent" }},</p>
+
+<p>Thank you for your interest in {{ school_name }}. After careful consideration, we regret to inform you that we are unable to offer admission to <strong>{{ student_name }}</strong> at this time.</p>
+
+{% if rejection_reason %}
+<div class="info-card">
+    <p style="margin: 0;"><strong>Reason:</strong> {{ rejection_reason }}</p>
+</div>
+{% endif %}
+
+<p>We appreciate the time and effort you put into the application process and wish {{ student_name }} all the best in their educational journey.</p>
+
+{% elif status == "Waitlisted" %}
+<div class="status-banner status-warning">
+    <h3>Application Waitlisted</h3>
+    <p>{{ student_name }}'s application has been placed on the waitlist.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or "Parent" }},</p>
+
+<p>Thank you for applying to {{ school_name }}. While we cannot offer immediate admission to <strong>{{ student_name }}</strong>, your application has been placed on our waitlist for the <strong>{{ program or "requested program" }}</strong>.</p>
+
+<p>Should a spot become available, we will contact you immediately. We encourage you to also explore other options in the meantime.</p>
+
+{% else %}
+<div class="status-banner status-info">
+    <h3>Application Status: {{ status }}</h3>
+    <p>Your application status has been updated.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or "Parent" }},</p>
+
+<p>The status of <strong>{{ student_name }}</strong>'s application has been updated to <strong>{{ status }}</strong>.</p>
+{% endif %}
+
+<div class="info-card" style="margin-top: 24px;">
+    <div class="info-row">
+        <span class="info-label">Application Reference</span>
+        <span class="info-value" style="font-family: monospace;">{{ application_name or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Updated On</span>
+        <span class="info-value">{{ frappe.utils.nowdate() }}</span>
+    </div>
+</div>
+
+{% if portal_url %}
+<hr class="divider">
+<p>You can view full details through our portal:</p>
+<a href="{{ portal_url }}" class="cta-button">View Application</a>
+{% endif %}
+
+<hr class="divider">
+
+<p style="font-size: 13px;">For any questions, please contact our admissions office at <a href="mailto:{{ company_email or '' }}">{{ company_email or 'the school office' }}</a>.</p>
+
+<p style="font-size: 14px; color: #1a202c;">Best regards,<br><strong>Admissions Team<br>{{ school_name }}</strong></p>
+{% endblock %}

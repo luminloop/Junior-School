@@ -1,0 +1,69 @@
+{% extends "nl_school/templates/emails/base.html" %}
+{% block content %}
+<h1>Application Received</h1>
+<p class="subtitle">Thank you for applying to {{ school_name }}</p>
+
+<div class="status-banner status-info">
+    <h3>Application Submitted Successfully</h3>
+    <p>Dear {{ guardian_name or parent_name or "Parent" }}, we have received your application for {{ student_name }}.</p>
+</div>
+
+<p>Thank you for choosing {{ school_name }} for your child's education. We have received the application and it is currently being reviewed by our admissions team.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">Applicant Name</span>
+        <span class="info-value">{{ student_name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Program Applied</span>
+        <span class="info-value">{{ program or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Academic Year</span>
+        <span class="info-value">{{ academic_year or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Application Date</span>
+        <span class="info-value">{{ application_date or frappe.utils.nowdate() }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Application Reference</span>
+        <span class="info-value" style="font-family: monospace;">{{ application_name or "N/A" }}</span>
+    </div>
+</div>
+
+<h2 style="font-size: 16px; margin-top: 24px;">What Happens Next?</h2>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">1. Review</span>
+        <span class="info-value">Our team reviews your application</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">2. Assessment</span>
+        <span class="info-value">Entrance assessment (if applicable)</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">3. Decision</span>
+        <span class="info-value">You'll receive admission decision</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">4. Enrollment</span>
+        <span class="info-value">Complete enrollment process</span>
+    </div>
+</div>
+
+<p style="margin-top: 24px;">You will receive another email once your application has been reviewed. The typical processing time is <strong>5-7 business days</strong>.</p>
+
+{% if portal_url %}
+<p>You can track your application status at any time through our portal:</p>
+<a href="{{ portal_url }}" class="cta-button">Track Application</a>
+{% endif %}
+
+<hr class="divider">
+
+<p style="font-size: 13px;">If you have any questions, please contact our admissions office at <a href="mailto:{{ company_email or '' }}">{{ company_email or 'the school office' }}</a>.</p>
+
+<p style="font-size: 14px; color: #1a202c;">Best regards,<br><strong>Admissions Team<br>{{ school_name }}</strong></p>
+{% endblock %}

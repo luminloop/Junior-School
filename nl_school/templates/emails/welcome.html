@@ -1,0 +1,57 @@
+{% extends "nl_school/templates/emails/base.html" %}
+{% block content %}
+<h1>Welcome to {{ school_name }}!</h1>
+<p class="subtitle">Your account has been successfully created</p>
+
+<div class="status-banner status-success">
+    <h3>Account Activated</h3>
+    <p>Welcome to our school community, {{ guardian_name or parent_name or "Parent" }}!</p>
+</div>
+
+<p>We're excited to have you and <strong>{{ student_name }}</strong> join our school family. Your account has been set up and you can now access the parent portal to:</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">View academic progress and grades</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Track attendance records</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Pay school fees online</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Receive important notifications</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Communicate with teachers</span>
+    </div>
+</div>
+
+<p style="margin-top: 24px;">Your login credentials:</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value">{{ email or "" }}</span>
+    </div>
+    {% if temporary_password %}
+    <div class="info-row">
+        <span class="info-label">Temporary Password</span>
+        <span class="info-value" style="font-family: monospace;">{{ temporary_password }}</span>
+    </div>
+    {% endif %}
+</div>
+
+<p style="color: #dc2626; font-size: 13px;"><strong>Important:</strong> {% if temporary_password %}Please change your password after your first login for security.{% else %}Use the "Forgot Password" link on the login page to set your password.{% endif %}</p>
+
+{% if login_url %}
+<a href="{{ login_url }}" class="cta-button">Access Parent Portal</a>
+{% endif %}
+
+<hr class="divider">
+
+<p style="font-size: 13px;">If you have any questions or need assistance, please don't hesitate to contact us at <a href="mailto:{{ company_email or '' }}">{{ company_email or 'the school office' }}</a>.</p>
+
+<p style="font-size: 14px; color: #1a202c;">Warm regards,<br><strong>{{ school_name }}</strong></p>
+{% endblock %}

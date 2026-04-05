@@ -1,0 +1,62 @@
+{% extends "nl_school/templates/emails/base.html" %}
+{% block content %}
+<h1>Absence Alert</h1>
+<p class="subtitle">{{ student_name }} was marked absent on {{ date }}</p>
+
+<div class="status-banner status-warning">
+    <h3>Student Absent Today</h3>
+    <p>{{ student_name }} was marked absent from {{ school_name }} on {{ date }}.</p>
+</div>
+
+<p>Dear {{ guardian_name or parent_name or "Parent" }},</p>
+
+<p>This is to inform you that <strong>{{ student_name }}</strong> was marked <strong>absent</strong> from school today.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">Student</span>
+        <span class="info-value">{{ student_name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Class</span>
+        <span class="info-value">{{ student_group or program or "N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Date</span>
+        <span class="info-value">{{ date }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Status</span>
+        <span class="info-value" style="color: #dc2626;">Absent</span>
+    </div>
+</div>
+
+{% if reason %}
+<div class="info-card">
+    <p style="margin: 0;"><strong>Reason (if provided):</strong> {{ reason }}</p>
+</div>
+{% endif %}
+
+{% if absent_days_count and absent_days_count > 1 %}
+<div class="status-banner status-danger" style="margin-top: 16px;">
+    <h3>Frequent Absence Alert</h3>
+    <p>{{ student_name }} has been absent for <strong>{{ absent_days_count }} consecutive days</strong>. Please contact the school if there are any concerns.</p>
+</div>
+{% endif %}
+
+<p style="margin-top: 24px;">If {{ student_name }} is unwell or there is a valid reason for the absence, please inform the school at your earliest convenience.</p>
+
+{% if portal_url %}
+<a href="{{ portal_url }}" class="cta-button">View Attendance Records</a>
+{% endif %}
+
+{% if leave_application_url %}
+<a href="{{ leave_application_url }}" class="cta-button cta-button-secondary" style="margin-left: 8px;">Submit Leave Application</a>
+{% endif %}
+
+<hr class="divider">
+
+<p style="font-size: 13px;">Regular attendance is important for academic success. If you have any concerns, please contact us at <a href="mailto:{{ company_email or '' }}">{{ company_email or 'the school office' }}</a> or call {{ company_phone or 'the school' }}.</p>
+
+<p style="font-size: 14px; color: #1a202c;">Regards,<br><strong>{{ school_name }}</strong></p>
+{% endblock %}
