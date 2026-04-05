@@ -706,31 +706,33 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
       callback: function (response) {
         let schedules = response.message;
 
+        if (!schedules || schedules.length === 0) {
+          frappe.msgprint(__("No schedule data found for the selected filters"));
+          return;
+        }
+
         let weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
         // Dynamically extract unique time slots from actual schedule data
         let uniqueTimes = new Set();
         schedules.forEach(schedule => {
-          uniqueTimes.add(schedule.from_time);
+          if (schedule.from_time) {
+            uniqueTimes.add(schedule.from_time);
+          }
         });
         
         // Sort times
         let sortedTimes = Array.from(uniqueTimes).sort();
         
-        // Build time slots with start and end times
-        let timeSlots = [];
-        sortedTimes.forEach((time, idx) => {
-          let endTime = idx < sortedTimes.length - 1 ? sortedTimes[idx + 1] : null;
-          // Find the actual end time from schedule data
-          let matchingSchedule = schedules.find(s => s.from_time === time);
-          if (matchingSchedule && matchingSchedule.to_time) {
-            endTime = matchingSchedule.to_time;
-          }
-          timeSlots.push({
-            start: time,
-            end: endTime || "N/A",
-          });
-        });
+        if (sortedTimes.length === 0) {
+          frappe.msgprint(__("No valid time slots found in schedule data"));
+          return;
+        }
+
+        // Build time slots
+        let timeSlots = sortedTimes.map((time) => ({
+          start: time,
+        }));
 
         let showInstructor = filter_type === "stream";
         let showStudentGroup = filter_type === "instructor";
@@ -742,59 +744,69 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
           title = `${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)} School ${title}`;
         }
 
+        // Build header with time ranges
+        let headerHTML = timeSlots.map((slot, idx) => {
+          let nextSlot = timeSlots[idx + 1];
+          let endTime = nextSlot ? nextSlot.start : "";
+          return `
+            <th style="width: 140px; text-align: center; vertical-align: middle; font-size: 11px; font-weight: 600; padding: 8px 4px;">
+              ${formatTime(slot.start)}${endTime ? ' – ' + formatTime(endTime) : ''}
+            </th>`;
+        }).join("");
+
         let tableHTML = `
-                <h3 class="text-center">${title}</h3>
-                <div style="display: flex; justify-content: center; overflow-x: auto;">
-                    <table class="table table-bordered" style="table-layout: fixed; width: auto; margin: auto;">
-                        <thead>
-                            <tr>
-                                <th style="width: 100px; text-align: center;">Day</th>
-                                ${timeSlots
-                                  .map(
-                                    (slot) => `
-                                    <th style="width: 150px; min-height: 80px; text-align: center; vertical-align: middle; font-size: 12px; font-weight: normal;">
-                                        ${formatTime(slot.start)} - ${formatTime(slot.end)}
-                                    </th>`,
-                                  )
-                                  .join("")}
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
+          <h2 style="text-align:center;margin-bottom:16px;font-family:Arial,sans-serif;">${title}</h2>
+          <table class="table table-bordered" style="table-layout:fixed;width:100%;font-size:11px;font-family:Arial,sans-serif;">
+            <thead>
+              <tr>
+                <th style="width:90px;text-align:center;background:#1a1a2e;color:#fff;padding:8px;">Day</th>
+                ${headerHTML}
+              </tr>
+            </thead>
+            <tbody>
+        `;
 
         weekdays.forEach((day) => {
-          tableHTML += `<tr><td>${day}</td>`;
+          tableHTML += `<tr><td style="font-weight:600;text-align:center;background:#f8fafc;padding:8px;">${day}</td>`;
 
           timeSlots.forEach((slot) => {
-            let matchedSchedule = schedules.find((schedule) => {
-              let scheduleDay = new Date(schedule.schedule_date)
+            // Find ALL schedules matching this day and time
+            let matchedSchedules = schedules.filter((schedule) => {
+              if (!schedule.schedule_date || !schedule.from_time) return false;
+              let scheduleDay = new Date(schedule.schedule_date + "T00:00:00")
                 .toLocaleDateString("en-US", { weekday: "long" })
                 .trim();
-
               return scheduleDay === day && schedule.from_time === slot.start;
             });
 
-            if (matchedSchedule) {
-              let displayText = "";
+            if (matchedSchedules.length > 0) {
+              let cellContent = matchedSchedules.map((s) => {
+                let parts = [];
+                if (showInstructor) {
+                  parts.push(`<strong>${s.course}</strong>`);
+                  parts.push(`<span style="color:#0ba4db;font-size:10px;">${s.instructor || ''}</span>`);
+                } else if (showStudentGroup) {
+                  parts.push(`<strong>${s.course}</strong>`);
+                  parts.push(`<span style="color:#16a34a;font-size:10px;">${s.student_group || ''}</span>`);
+                } else {
+                  parts.push(`<strong>${s.course}</strong>`);
+                  if (s.instructor) parts.push(`<span style="font-size:10px;color:#64748b;">${s.instructor}</span>`);
+                  if (s.student_group) parts.push(`<span style="font-size:10px;color:#64748b;">${s.student_group}</span>`);
+                }
+                if (s.room) parts.push(`<span style="font-size:9px;color:#94a3b8;">${s.room}</span>`);
+                return parts.join("<br>");
+              }).join("<hr style='margin:4px 0;border-color:#e2e8f0;'>");
 
-              if (showInstructor) {
-                displayText = `${matchedSchedule.course} - <span style="color: blue;">${matchedSchedule.instructor}</span>`;
-              } else if (showStudentGroup) {
-                displayText = `${matchedSchedule.course} - <span style="color: green;">${matchedSchedule.student_group}</span>`;
-              } else {
-                displayText = matchedSchedule.course;
-              }
-
-              tableHTML += `<td>${displayText}</td>`;
+              tableHTML += `<td style="padding:6px;vertical-align:top;font-size:10px;line-height:1.4;">${cellContent}</td>`;
             } else {
-              tableHTML += `<td></td>`;
+              tableHTML += `<td style="background:#fafafa;"></td>`;
             }
           });
 
           tableHTML += `</tr>`;
         });
 
-        tableHTML += `</tbody></table></div>`;
+        tableHTML += `</tbody></table>`;
 
         let printableDiv = document.getElementById("printable-timetable");
         printableDiv.innerHTML = tableHTML;
