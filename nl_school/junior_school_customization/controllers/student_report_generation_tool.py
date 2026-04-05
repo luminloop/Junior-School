@@ -438,8 +438,11 @@ def get_class_teacher(student_name):
     if parent_list:
         first_parent = parent_list[0][0]
 
+        # Get the first instructor assigned to this student group
         class_teacher = frappe.db.get_value(
-            "Student Group", first_parent, "custom_class_teacher"
+            "Student Group Instructor",
+            {"parent": first_parent},
+            "instructor_name"
         )
         return class_teacher
 
