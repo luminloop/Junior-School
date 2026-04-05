@@ -177,6 +177,15 @@ class TeacherDashboard {
               ${this.render_quick_actions()}
             </div>
 
+            <!-- My Timetable Widget -->
+            <div class="frappe-card mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="section-title mb-0">${__("My Timetable")} <span class="text-muted font-weight-normal ml-2" style="font-size: 12px;">${__("This Week")}</span></div>
+                <a href="/desk/course-schedule?instructor=${instructor.name || ''}" class="text-muted text-decoration-none" style="font-size: 12px;">${__("View All")}</a>
+              </div>
+              ${this.render_timetable()}
+            </div>
+
             <!-- Upcoming Assessments Widget -->
             <div class="frappe-card mb-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
@@ -267,7 +276,7 @@ class TeacherDashboard {
       { label: "Mark Attendance", route: "/desk/enhanced-student-attendance-tool", icon: "tick" },
       { label: "Enter Marks", route: "/desk/assessment-result/new", icon: "edit" },
       { label: "Bulk Enter Marks", route: "/desk/assessment-result-tool", icon: "list" },
-      { label: "View Schedule", route: "/desk/course-schedule", icon: "calendar" },
+      { label: "My Timetable", route: "/desk/course-schedule?instructor=" + (instructor.name || ''), icon: "calendar" },
       { label: "Student Logs", route: "/desk/student-log", icon: "file-text" },
     ];
 
@@ -280,6 +289,57 @@ class TeacherDashboard {
             </span>
             <span class="text-muted text-truncate">${__(action.label)}</span>
           </a>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  render_timetable() {
+    const timetable = this.data.my_timetable || [];
+
+    if (timetable.length === 0) {
+      return `
+        <div class="empty-state">
+          <div class="empty-state-icon" style="color: var(--gray-400);">
+            ${frappe.utils.icon("calendar", "lg")}
+          </div>
+          <p class="mb-0" style="font-size: 13px;">${__("No classes scheduled this week")}</p>
+        </div>
+      `;
+    }
+
+    const day_colors = {
+      "Monday": "var(--blue-500)",
+      "Tuesday": "var(--green-500)",
+      "Wednesday": "var(--orange-500)",
+      "Thursday": "var(--purple-500)",
+      "Friday": "var(--cyan-500)",
+      "Saturday": "var(--gray-500)",
+      "Sunday": "var(--red-500)",
+    };
+
+    return `
+      <div class="d-flex flex-column">
+        ${timetable.map(day => `
+          <div style="margin-bottom: 12px;">
+            <div style="font-size: 12px; font-weight: 600; color: ${day_colors[day.day] || 'var(--text-muted)'}; margin-bottom: 4px;">
+              ${day.day} <span style="font-weight: 400; color: var(--text-muted);">(${frappe.datetime.str_to_user(day.date)})</span>
+            </div>
+            ${day.schedules.map(s => `
+              <div class="list-item text-decoration-none" style="padding: 6px 8px; margin-bottom: 2px;">
+                <span class="list-item-icon" style="color: var(--blue-500);">
+                  ${frappe.utils.icon("clock", "sm")}
+                </span>
+                <div class="d-flex flex-column text-truncate" style="flex: 1; min-width: 0;">
+                  <span style="font-size: 13px; font-weight: 500;" class="text-truncate">${s.course}</span>
+                  <span class="text-muted" style="font-size: 11px;">${s.student_group_name || s.student_group} | ${s.from_time} - ${s.to_time}${s.room ? ' | Room: ' + s.room : ''}</span>
+                </div>
+                <a href="/desk/course-schedule/${s.name}" class="btn btn-xs btn-default" title="${__("View/Edit")}" style="margin-left: 8px;">
+                  ${frappe.utils.icon("edit", "xs")}
+                </a>
+              </div>
+            `).join("")}
+          </div>
         `).join("")}
       </div>
     `;

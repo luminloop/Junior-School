@@ -18,6 +18,7 @@ def get_dashboard_data():
             "attendance_trend": [],
             "upcoming_assessments": [],
             "recent_activity": [],
+            "my_timetable": [],
         }
     
     return {
@@ -28,6 +29,7 @@ def get_dashboard_data():
         "attendance_trend": get_attendance_trend(instructor),
         "upcoming_assessments": get_upcoming_assessments(instructor),
         "recent_activity": get_recent_activity(instructor),
+        "my_timetable": get_my_timetable(instructor),
     }
 
 
@@ -294,3 +296,79 @@ def get_recent_activity(instructor):
     activities.sort(key=lambda x: x["time"], reverse=True)
     
     return activities[:8]
+
+
+def get_my_timetable(instructor):
+    """
+    Get this week's timetable for the instructor.
+    Returns a list of days with their schedules.
+    """
+    instructor_name = instructor.get("name")
+    today = getdate(nowdate())
+    monday = today - frappe.utils.getdate(today).weekday() * frappe.utils.timedelta(days=1)
+    sunday = monday + frappe.utils.timedelta(days=6)
+    
+    # Get student groups
+    student_groups = frappe.get_all(
+        "Student Group Instructor",
+        filters={"instructor": instructor_name},
+        pluck="parent"
+    )
+    
+    if not student_groups:
+        return []
+    
+    # Get course schedules for this week
+    schedules = frappe.db.sql("""
+        SELECT 
+            cs.name,
+            cs.course,
+            cs.student_group,
+            sg.student_group_name,
+            cs.room,
+            cs.schedule_date,
+            cs.from_time,
+            cs.to_time,
+            cs.title
+        FROM `tabCourse Schedule` cs
+        LEFT JOIN `tabStudent Group` sg ON cs.student_group = sg.name
+        WHERE cs.instructor = %(instructor)s
+        AND cs.schedule_date BETWEEN %(monday)s AND %(sunday)s
+        ORDER BY cs.schedule_date, cs.from_time
+    """, {
+        "instructor": instructor_name,
+        "monday": monday,
+        "sunday": sunday,
+    }, as_dict=True)
+    
+    # Group by day
+    days_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    timetable = {}
+    
+    for sched in schedules:
+        day_name = frappe.utils.getdate(sched.schedule_date).strftime("%A")
+        if day_name not in timetable:
+            timetable[day_name] = {
+                "day": day_name,
+                "date": sched.schedule_date,
+                "schedules": []
+            }
+        
+        timetable[day_name]["schedules"].append({
+            "name": sched.name,
+            "course": sched.course,
+            "student_group": sched.student_group,
+            "student_group_name": sched.student_group_name,
+            "room": sched.room,
+            "from_time": str(sched.from_time) if sched.from_time else "",
+            "to_time": str(sched.to_time) if sched.to_time else "",
+            "title": sched.title,
+        })
+    
+    # Sort by day order and return
+    result = []
+    for day in days_order:
+        if day in timetable:
+            result.append(timetable[day])
+    
+    return result

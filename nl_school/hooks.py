@@ -35,7 +35,7 @@ add_to_apps_screen = [
 
 # include js, css files in header of desk.html
 app_include_css = "/assets/nl_school/css/school_dashboard.css"
-# app_include_js = "/assets/nl_school/js/nl_school.js"
+app_include_js = "/assets/nl_school/js/instructor_list_filters.js"
 
 
 # include js, css files in header of web template
