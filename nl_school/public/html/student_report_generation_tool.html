@@ -1,150 +1,484 @@
 <style>
+    /* Print-optimized Report Card Styles */
+    @page {
+        size: A4;
+        margin: 15mm;
+    }
+
     .report-card {
-        font-family: Arial, sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         width: 100%;
-        max-width: 800px;
+        max-width: 210mm;
         margin: 0 auto;
-        padding: 20px;
-        border: 1px solid #ccc;
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='100px' width='100px'><text transform='translate(20, 100) rotate(-45)' fill='rgba(0, 123, 167,0.2)' font-size='20' opacity='0.7'>Shofco</text></svg>");
+        color: #1a1a2e;
+        line-height: 1.4;
     }
-    .header-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
+
+    /* Header Section */
+    .rc-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 3px solid #0ba4db;
+        margin-bottom: 16px;
     }
-    .header-table td {
-        vertical-align: top;
-        padding: 0;
-    }
-    .header {
+
+    .rc-school-info {
+        flex: 1;
         text-align: center;
     }
-    .student-image {
-        width: 150px;
-        height: 150px;
+
+    .rc-school-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0;
+        letter-spacing: 0.5px;
     }
-    .student-info {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
+
+    .rc-school-subtitle {
+        font-size: 10px;
+        color: #64748b;
+        margin: 2px 0 0 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
-    .student-info-left, .student-info-right {
+
+    .rc-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0ba4db;
+        margin: 6px 0 0 0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .rc-student-photo {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        object-fit: cover;
+    }
+
+    /* Student Info Grid */
+    .rc-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px 24px;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 11px;
+    }
+
+    .rc-info-item {
         display: flex;
         flex-direction: column;
     }
-    .info-item {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
+
+    .rc-info-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 2px;
     }
-    .table {
+
+    .rc-info-value {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1a1a2e;
+    }
+
+    /* Main Grades Table */
+    .rc-section-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0 0 8px 0;
+        padding-bottom: 4px;
+        border-bottom: 2px solid #e2e8f0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .rc-grades-table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
+        font-size: 10px;
     }
-    .table th, .table td {
-        border: 1px solid #ccc;
-        padding: 8px;
+
+    .rc-grades-table th {
+        background: #0ba4db;
+        color: #ffffff;
+        padding: 6px 8px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border: 1px solid #098bbf;
+    }
+
+    .rc-grades-table th.subject-col {
+        text-align: left;
+        width: 25%;
+        background: #1a1a2e;
+    }
+
+    .rc-grades-table th.exam-header {
+        background: #334155;
+    }
+
+    .rc-grades-table th.sub-header {
+        background: #475569;
+        font-size: 8px;
+    }
+
+    .rc-grades-table td {
+        padding: 5px 8px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        font-size: 10px;
+    }
+
+    .rc-grades-table td.subject-name {
+        text-align: left;
+        font-weight: 600;
+        color: #1a1a2e;
+        background: #f8fafc;
+    }
+
+    .rc-grades-table td.score-cell {
+        font-weight: 600;
+    }
+
+    .rc-grades-table td.grade-cell {
+        font-weight: 700;
+        font-size: 11px;
+    }
+
+    .rc-grades-table td.grade-excellent { color: #16a34a; }
+    .rc-grades-table td.grade-good { color: #ca8a04; }
+    .rc-grades-table td.grade-average { color: #ea580c; }
+    .rc-grades-table td.grade-poor { color: #dc2626; }
+
+    .rc-grades-table tr.average-row td {
+        background: #f1f5f9;
+        font-weight: 700;
+        font-size: 11px;
+        border-top: 2px solid #0ba4db;
+    }
+
+    .rc-grades-table tr.average-row td.subject-name {
+        background: #e2e8f0;
+        color: #0ba4db;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Performance Summary */
+    .rc-summary-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .rc-summary-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px;
         text-align: center;
     }
-    .table th {
-        background-color: #f2f2f2;
+
+    .rc-summary-card .label {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 4px;
     }
-    .average-row {
-        font-weight: bold;
+
+    .rc-summary-card .value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1a1a2e;
     }
-    .teacher-comment {
-        margin-top: 20px;
+
+    .rc-summary-card .sub {
+        font-size: 10px;
+        color: #64748b;
+        margin-top: 2px;
     }
-    .timestamp {
-        color: #555;
+
+    .rc-summary-card.excellent .value { color: #16a34a; }
+    .rc-summary-card.good .value { color: #ca8a04; }
+    .rc-summary-card.average .value { color: #ea580c; }
+    .rc-summary-card.poor .value { color: #dc2626; }
+
+    /* Subject Performance Chart */
+    .rc-chart-container {
+        margin-bottom: 16px;
+        padding: 12px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .rc-chart-title {
         font-size: 11px;
-        font-weight: normal;
-        text-align: right;
-        margin-left: auto;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin: 0 0 8px 0;
     }
-    .handwritten {
-        color: #0b5394;
-        font-family: 'Kalam', cursive;
-        font-size: 16px;
-        line-height: 1.6;
+
+    /* Attendance Section */
+    .rc-attendance {
+        display: flex;
+        gap: 16px;
+        padding: 10px 16px;
+        background: #f8fafc;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 11px;
+    }
+
+    .rc-attendance-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .rc-attendance-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .rc-attendance-dot.present { background: #16a34a; }
+    .rc-attendance-dot.absent { background: #dc2626; }
+
+    .rc-attendance-label {
+        color: #64748b;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .rc-attendance-value {
+        font-weight: 700;
+        font-size: 14px;
+        color: #1a1a2e;
+    }
+
+    /* Teacher Comments */
+    .rc-comments {
+        margin-bottom: 16px;
+    }
+
+    .rc-comment-block {
+        padding: 10px 14px;
+        background: #f8fafc;
+        border-left: 3px solid #0ba4db;
+        border-radius: 0 6px 6px 0;
+        margin-bottom: 8px;
+    }
+
+    .rc-comment-subject {
+        font-size: 10px;
+        font-weight: 700;
+        color: #0ba4db;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 4px;
+    }
+
+    .rc-comment-text {
+        font-size: 11px;
+        color: #475569;
+        line-height: 1.5;
+        font-style: italic;
+    }
+
+    .rc-general-comment {
+        padding: 12px 16px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
+
+    .rc-general-comment .label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #166534;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .rc-general-comment .text {
+        font-size: 11px;
+        color: #15803d;
+        line-height: 1.5;
+    }
+
+    /* Footer */
+    .rc-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding-top: 16px;
+        border-top: 2px solid #e2e8f0;
+        margin-top: 16px;
+    }
+
+    .rc-signature {
+        text-align: center;
+    }
+
+    .rc-signature-line {
+        width: 150px;
+        border-bottom: 1px solid #94a3b8;
+        margin-bottom: 4px;
+        height: 30px;
+    }
+
+    .rc-signature-label {
+        font-size: 9px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .rc-stamp {
+        text-align: right;
+    }
+
+    .rc-stamp img {
+        max-width: 120px;
+        height: auto;
+        opacity: 0.8;
+    }
+
+    .rc-date {
+        font-size: 9px;
+        color: #94a3b8;
+        text-align: right;
+        margin-top: 8px;
+    }
+
+    /* Print-specific adjustments */
+    @media print {
+        .report-card {
+            max-width: 100%;
+        }
+        .rc-grades-table th {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .rc-grades-table td.subject-name {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .rc-summary-card,
+        .rc-chart-container,
+        .rc-comment-block,
+        .rc-general-comment,
+        .rc-attendance,
+        .rc-info-grid {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
     }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Kalam&display=swap" rel="stylesheet">
 
 <div class="report-card">
-    <!-- Header and Image in a Table -->
-    <table class="header-table">
-        <tr>
-            <td style="width: 25%; text-align: left;">
-                {% if student_image %}
-                        <img class="student-image" src="{{ student_image }}" alt="Student Image">
-                {% else %}
-                        <img class="student-image" src="https://ui-avatars.com/api/?name=Girl+Student&background=22b573&color=fff&size=128" alt="Default Girl Avatar">
-                {% endif %}
-            </td>
-            <td style="width: 50%; text-align: center;">
-                <div class="header">
-                    {% if letterhead %}
-                    <div class="letterhead">{{ letterhead }}</div>
-                    {% endif %}
-                    <h3>ASSESSMENT REPORT</h3>
-                </div>
-            </td>
-            <td style="width: 25%; text-align: left;">
-                <!-- Left Space (Optional) -->
-            </td>
-        </tr>
-    </table>
+    <!-- Header -->
+    <div class="rc-header">
+        {% if student_image %}
+        <img class="rc-student-photo" src="{{ student_image }}" alt="Student">
+        {% else %}
+        <div class="rc-student-photo" style="display:flex;align-items:center;justify-content:center;background:#e2e8f0;font-size:24px;color:#64748b;">
+            {{ (doc.student_name or "S")[0] }}
+        </div>
+        {% endif %}
+        <div class="rc-school-info">
+            {% if letterhead %}
+            <div class="letterhead">{{ letterhead }}</div>
+            {% else %}
+            <p class="rc-school-name">{{ doc.school or "Lemana Junior School" }}</p>
+            {% endif %}
+            <p class="rc-school-subtitle">Competency-Based Curriculum • Junior Secondary</p>
+            <p class="rc-title">Academic Report Card</p>
+        </div>
+        <div style="width:80px;"></div>
+    </div>
 
-    <table class="student-info" style="width: 100%; border-collapse: collapse;">
-        <tr>
-            <td style="text-align: left; padding: 4px;">
-                <p><strong>Learner's Name:</strong> {{ doc.student_name or 'None' }}</p>
-            </td>
-            <td style="text-align: right; padding: 4px;">
-                <p><strong>Grade:</strong> {{ doc.program or 'None' }}</p>
-            </td>
-        </tr>
-        <tr>
-            <td style="text-align: left; padding: 4px;">
-                <p><strong>Class Teacher:</strong> {{ class_teacher }}</p>
-            </td>
-            <td style="text-align: right; padding: 4px;">
-                <p><strong>Term:</strong> {{ doc.academic_term or 'None' }}</p>
-            </td>
-        </tr>
-    </table>
-    <hr style="background:#5d93b3; height:3px">
+    <!-- Student Info Grid -->
+    <div class="rc-info-grid">
+        <div class="rc-info-item">
+            <span class="rc-info-label">Student Name</span>
+            <span class="rc-info-value">{{ doc.student_name or '-' }}</span>
+        </div>
+        <div class="rc-info-item">
+            <span class="rc-info-label">Grade / Class</span>
+            <span class="rc-info-value">{{ doc.program or '-' }}</span>
+        </div>
+        <div class="rc-info-item">
+            <span class="rc-info-label">Stream</span>
+            <span class="rc-info-value">{{ doc.student_group or '-' }}</span>
+        </div>
+        <div class="rc-info-item">
+            <span class="rc-info-label">Academic Term</span>
+            <span class="rc-info-value">{{ doc.academic_term or '-' }}</span>
+        </div>
+        <div class="rc-info-item">
+            <span class="rc-info-label">Class Teacher</span>
+            <span class="rc-info-value">{{ class_teacher or '-' }}</span>
+        </div>
+        <div class="rc-info-item">
+            <span class="rc-info-label">Report Date</span>
+            <span class="rc-info-value">{{ frappe.utils.nowdate() }}</span>
+        </div>
+    </div>
 
-    <table class="table">
+    <!-- Grades Table -->
+    <p class="rc-section-title">Academic Performance</p>
+    <table class="rc-grades-table">
         <thead>
             <tr>
-                <th>Learning Area</th>
+                <th rowspan="2" class="subject-col">Learning Area</th>
                 {% if show_opener %}
-                <th colspan="2" style="background:orange">Opener Assessment</th>
+                <th colspan="2" class="exam-header">Opener Exam</th>
                 {% endif %}
                 {% if show_midterm %}
-                <th colspan="2" style="background:orange">Mid Term Assessment</th>
+                <th colspan="2" class="exam-header">Mid Term</th>
                 {% endif %}
                 {% if show_endterm %}
-                <th colspan="2" style="background:orange">End Term Assessment</th>
+                <th colspan="2" class="exam-header">End Term</th>
                 {% endif %}
             </tr>
             <tr>
-                <th></th>
                 {% if show_opener %}
-                <th style="background:#5d93b3">Score</th>
-                <th style="background:#5d93b3">Comment</th>
+                <th class="sub-header">Score</th>
+                <th class="sub-header">Grade</th>
                 {% endif %}
                 {% if show_midterm %}
-                <th style="background:#5d93b3">Score</th>
-                <th style="background:#5d93b3">Comment</th>
+                <th class="sub-header">Score</th>
+                <th class="sub-header">Grade</th>
                 {% endif %}
                 {% if show_endterm %}
-                <th style="background:#5d93b3">Score</th>
-                <th style="background:#5d93b3">Comment</th>
+                <th class="sub-header">Score</th>
+                <th class="sub-header">Grade</th>
                 {% endif %}
             </tr>
         </thead>
@@ -154,120 +488,180 @@
                 {% if result.course not in subjects %}
                     {% set _ = subjects.update({result.course: {}}) %}
                 {% endif %}
-                {% set _ = subjects[result.course].update({result.assessment_group: {"score": result.levels, "grade": result.grade}}) %}
+                {% set _ = subjects[result.course].update({result.assessment_group: {"score": result.levels, "grade": result.grade, "percentage": result.get("percentage", 0)}}) %}
             {% endfor %}
 
             {% for course, assessments in subjects.items() %}
+            {% set endterm = assessments.get("End Term", {}) %}
+            {% set endterm_pct = endterm.get("percentage", 0) %}
+            {% set grade_class = "grade-excellent" if endterm_pct >= 70 else "grade-good" if endterm_pct >= 50 else "grade-average" if endterm_pct >= 30 else "grade-poor" %}
             <tr>
-                <td>{{ course }}</td>
+                <td class="subject-name">{{ course }}</td>
                 {% if show_opener %}
                 <td>{{ assessments.get("Opener Exam", {}).get("score", "-") }}</td>
-                <td>{{ assessments.get("Opener Exam", {}).get("grade", "-") }}</td>
+                <td class="grade-cell">{{ assessments.get("Opener Exam", {}).get("grade", "-") }}</td>
                 {% endif %}
                 {% if show_midterm %}
                 <td>{{ assessments.get("Mid Term", {}).get("score", "-") }}</td>
-                <td>{{ assessments.get("Mid Term", {}).get("grade", "-") }}</td>
+                <td class="grade-cell">{{ assessments.get("Mid Term", {}).get("grade", "-") }}</td>
                 {% endif %}
                 {% if show_endterm %}
                 <td>{{ assessments.get("End Term", {}).get("score", "-") }}</td>
-                <td>{{ assessments.get("End Term", {}).get("grade", "-") }}</td>
+                <td class="grade-cell {{ grade_class }}">{{ assessments.get("End Term", {}).get("grade", "-") }}</td>
                 {% endif %}
             </tr>
             {% endfor %}
             <tr class="average-row">
-                <td style="color:red">Average</td>
+                <td class="subject-name">Overall Average</td>
                 {% if show_opener %}
-                <td>{{ averages.opener.levels if averages.opener.levels != "-" else "-" }}</td>
+                <td>{{ averages.opener.score if averages.opener.score != "-" else "-" }}</td>
                 <td>{{ averages.opener.grade if averages.opener.grade != "-" else "-" }}</td>
                 {% endif %}
                 {% if show_midterm %}
-                <td>{{ averages.mid_term.levels if averages.mid_term.levels != "-" else "-" }}</td>
+                <td>{{ averages.mid_term.score if averages.mid_term.score != "-" else "-" }}</td>
                 <td>{{ averages.mid_term.grade if averages.mid_term.grade != "-" else "-" }}</td>
                 {% endif %}
                 {% if show_endterm %}
-                <td>{{ averages.end_term.levels if averages.end_term.levels != "-" else "-" }}</td>
+                <td>{{ averages.end_term.score if averages.end_term.score != "-" else "-" }}</td>
                 <td>{{ averages.end_term.grade if averages.end_term.grade != "-" else "-" }}</td>
                 {% endif %}
             </tr>
         </tbody>
     </table>
 
-    <div class="subject-analysis">
-        <h3>Subject Performance Chart</h3>
-        {% set chart_data = [] %}
-        {% set max_score = 100 %}
-        {% for result in assessment_result %}
-            {% if result.percentage %}
-                {% set _ = chart_data.append({"course": result.course.split("-")[0].strip() if "-" in result.course else result.course, "score": result.percentage, "assessment_group": result.assessment_group}) %}
-            {% endif %}
-        {% endfor %}
-        
-        {% if chart_data %}
-        <div style="margin: 20px 0; padding: 10px; background: #fafafa; border-radius: 8px;">
-            <svg width="100%" height="{{ (chart_data|length * 35) + 60 }}" viewBox="0 0 600 {{ (chart_data|length * 35) + 60 }}" style="font-family: Arial, sans-serif;">
-                <!-- Chart Title -->
-                <text x="300" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">Current Term Subject Scores</text>
-                
-                <!-- Y-axis labels and bars -->
-                {% for item in chart_data %}
-                {% set bar_y = 40 + (loop.index0 * 35) %}
-                {% set bar_width = (item.score / max_score) * 400 %}
-                {% set bar_color = "#22b573" if item.score >= 70 else "#f5a623" if item.score >= 50 else "#e74c3c" %}
-                
-                <!-- Subject label -->
-                <text x="95" y="{{ bar_y + 17 }}" text-anchor="end" font-size="11" fill="#333">{{ item.course[:12] }}{% if item.course|length > 12 %}...{% endif %}</text>
-                
-                <!-- Bar background -->
-                <rect x="100" y="{{ bar_y }}" width="400" height="25" fill="#e0e0e0" rx="3" ry="3"/>
-                
-                <!-- Score bar -->
-                <rect x="100" y="{{ bar_y }}" width="{{ bar_width }}" height="25" fill="{{ bar_color }}" rx="3" ry="3"/>
-                
-                <!-- Score label -->
-                <text x="{{ 105 + bar_width }}" y="{{ bar_y + 17 }}" font-size="11" font-weight="bold" fill="#333">{{ item.score|round(1) }}%</text>
-                {% endfor %}
-                
-                <!-- X-axis scale markers -->
-                <line x1="100" y1="{{ (chart_data|length * 35) + 45 }}" x2="500" y2="{{ (chart_data|length * 35) + 45 }}" stroke="#ccc" stroke-width="1"/>
-                <text x="100" y="{{ (chart_data|length * 35) + 58 }}" font-size="10" fill="#666">0</text>
-                <text x="200" y="{{ (chart_data|length * 35) + 58 }}" font-size="10" fill="#666">25</text>
-                <text x="300" y="{{ (chart_data|length * 35) + 58 }}" font-size="10" fill="#666">50</text>
-                <text x="400" y="{{ (chart_data|length * 35) + 58 }}" font-size="10" fill="#666">75</text>
-                <text x="495" y="{{ (chart_data|length * 35) + 58 }}" font-size="10" fill="#666">100</text>
-            </svg>
-            
-            <!-- Legend -->
-            <div style="display: flex; justify-content: center; gap: 20px; margin-top: 10px; font-size: 11px;">
-                <span><span style="display: inline-block; width: 12px; height: 12px; background: #22b573; border-radius: 2px; margin-right: 4px;"></span>Excellent (≥70%)</span>
-                <span><span style="display: inline-block; width: 12px; height: 12px; background: #f5a623; border-radius: 2px; margin-right: 4px;"></span>Good (50-69%)</span>
-                <span><span style="display: inline-block; width: 12px; height: 12px; background: #e74c3c; border-radius: 2px; margin-right: 4px;"></span>Needs Improvement (<50%)</span>
+    <!-- Performance Summary Cards -->
+    <div class="rc-summary-grid">
+        {% set endterm_avg = averages.end_term.score if averages.end_term.score != "-" else 0 %}
+        {% set summary_class = "excellent" if endterm_avg >= 70 else "good" if endterm_avg >= 50 else "average" if endterm_avg >= 30 else "poor" %}
+        <div class="rc-summary-card {{ summary_class }}">
+            <div class="label">End Term Average</div>
+            <div class="value">{{ endterm_avg }}%</div>
+            <div class="sub">{{ averages.end_term.grade if averages.end_term.grade != "-" else "-" }}</div>
+        </div>
+        <div class="rc-summary-card">
+            <div class="label">Attendance</div>
+            {% set att_pct = ((doc.attendance.present or 0) / (doc.attendance.total or 1) * 100) | round(1) %}
+            <div class="value">{{ att_pct }}%</div>
+            <div class="sub">{{ doc.attendance.present or 0 }} / {{ doc.attendance.total or 0 }} days</div>
+        </div>
+        <div class="rc-summary-card">
+            <div class="label">Subjects</div>
+            <div class="value">{{ subjects | length }}</div>
+            <div class="sub">CBC Learning Areas</div>
+        </div>
+    </div>
+
+    <!-- Attendance Bar -->
+    {% if doc.attendance %}
+    <div class="rc-attendance">
+        <div class="rc-attendance-item">
+            <div class="rc-attendance-dot present"></div>
+            <div>
+                <div class="rc-attendance-label">Present</div>
+                <div class="rc-attendance-value">{{ doc.attendance.present or 0 }}</div>
             </div>
         </div>
-        {% else %}
-        <p style="color: #666; font-style: italic;">No assessment data available for chart.</p>
+        <div class="rc-attendance-item">
+            <div class="rc-attendance-dot absent"></div>
+            <div>
+                <div class="rc-attendance-label">Absent</div>
+                <div class="rc-attendance-value">{{ doc.attendance.absent or 0 }}</div>
+            </div>
+        </div>
+        <div class="rc-attendance-item">
+            <div>
+                <div class="rc-attendance-label">Total Days</div>
+                <div class="rc-attendance-value">{{ doc.attendance.total or 0 }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Subject Performance Chart -->
+    {% set chart_data = [] %}
+    {% for result in assessment_result %}
+        {% if result.assessment_group == "End Term" and result.percentage %}
+            {% set _ = chart_data.append({"course": result.course.split("-")[0].strip() if "-" in result.course else result.course, "score": result.percentage}) %}
+        {% endif %}
+    {% endfor %}
+
+    {% if chart_data %}
+    <div class="rc-chart-container">
+        <p class="rc-chart-title">End Term Subject Performance</p>
+        <svg width="100%" height="{{ (chart_data | length * 28) + 40 }}" viewBox="0 0 550 {{ (chart_data | length * 28) + 40 }}" style="font-family: 'Inter', sans-serif;">
+            {% for item in chart_data %}
+            {% set bar_y = 20 + (loop.index0 * 28) %}
+            {% set bar_width = (item.score / 100) * 380 %}
+            {% set bar_color = "#16a34a" if item.score >= 70 else "#ca8a04" if item.score >= 50 else "#ea580c" if item.score >= 30 else "#dc2626" %}
+
+            <text x="130" y="{{ bar_y + 15 }}" text-anchor="end" font-size="9" fill="#475569" font-weight="500">{{ item.course[:18] }}{% if item.course | length > 18 %}..{% endif %}</text>
+            <rect x="135" y="{{ bar_y + 2 }}" width="380" height="20" fill="#f1f5f9" rx="3" ry="3"/>
+            <rect x="135" y="{{ bar_y + 2 }}" width="{{ bar_width }}" height="20" fill="{{ bar_color }}" rx="3" ry="3"/>
+            <text x="{{ 140 + bar_width }}" y="{{ bar_y + 15 }}" font-size="9" font-weight="700" fill="#1a1a2e">{{ item.score | round(1) }}%</text>
+            {% endfor %}
+
+            <line x1="135" y1="{{ (chart_data | length * 28) + 25 }}" x2="515" y2="{{ (chart_data | length * 28) + 25 }}" stroke="#e2e8f0" stroke-width="1"/>
+            <text x="135" y="{{ (chart_data | length * 28) + 36 }}" font-size="8" fill="#94a3b8">0</text>
+            <text x="230" y="{{ (chart_data | length * 28) + 36 }}" font-size="8" fill="#94a3b8">25</text>
+            <text x="325" y="{{ (chart_data | length * 28) + 36 }}" font-size="8" fill="#94a3b8">50</text>
+            <text x="420" y="{{ (chart_data | length * 28) + 36 }}" font-size="8" fill="#94a3b8">75</text>
+            <text x="510" y="{{ (chart_data | length * 28) + 36 }}" font-size="8" fill="#94a3b8">100</text>
+        </svg>
+        <div style="display:flex;justify-content:center;gap:16px;margin-top:6px;font-size:9px;color:#64748b;">
+            <span><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px;margin-right:3px;"></span>Excellent (≥70%)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:#ca8a04;border-radius:2px;margin-right:3px;"></span>Good (50-69%)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:#ea580c;border-radius:2px;margin-right:3px;"></span>Average (30-49%)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:2px;margin-right:3px;"></span>Below (‹30%)</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Subject Teacher Comments -->
+    {% set teacher_comments = [] %}
+    {% for result in values.assessment_result %}
+        {% if result.get("subject_teacher_comments") %}
+            {% for comment in result.subject_teacher_comments %}
+                {% set _ = teacher_comments.append({"course": result.course, "comment": comment.comment}) %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+
+    {% if teacher_comments %}
+    <p class="rc-section-title">Subject Teacher Comments</p>
+    {% for tc in teacher_comments %}
+    <div class="rc-comment-block">
+        <div class="rc-comment-subject">{{ tc.course }}</div>
+        <div class="rc-comment-text">"{{ tc.comment }}"</div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- General Comment -->
+    {% if doc.custom_teachers_comment or doc.assessment_terms %}
+    <div class="rc-general-comment">
+        <div class="label">Class Teacher's General Comment</div>
+        <div class="text">{{ doc.custom_teachers_comment or doc.assessment_terms }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="rc-footer">
+        <div class="rc-signature">
+            <div class="rc-signature-line"></div>
+            <div class="rc-signature-label">Class Teacher's Signature</div>
+        </div>
+        <div class="rc-signature">
+            <div class="rc-signature-line"></div>
+            <div class="rc-signature-label">Principal's Signature</div>
+        </div>
+        {% if rubber_stamp %}
+        <div class="rc-stamp">
+            <img src="{{ rubber_stamp }}" alt="School Stamp">
+        </div>
         {% endif %}
     </div>
 
-    <div class="teacher-comment">
-        <h3>Class Teacher's Comment:</h3>
-        <p class="handwritten">{{ doc.custom_teachers_comment if doc.custom_teachers_comment else doc.assessment_terms or '' }}</p>
-        <hr style="border-top: dashed 1px #ccc; margin: 10px 0;">
+    <div class="rc-date">
+        Generated: {{ date }}
     </div>
-    <div class="footer-image">
-
-<div class="letterhead-footer">
-    {% if rubber_stamp %}
-    <div style="text-align: right; margin-top: 40px;">
-        <img src="{{ rubber_stamp }}" alt="Rubber Stamp" style="width: 150px; height: auto;">
-        <p style="font-size: 12px; color: #555;">Authorized Stamp</p>
-    </div>
-{% endif %}
-
-</div>    </div>
-
-    <div class="timestamp">
-        Report generated on: {{ date }}
-    </div>
-
 </div>
-

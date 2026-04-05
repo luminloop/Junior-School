@@ -326,6 +326,15 @@ def get_formatted_result(args, get_course=False):
         )
         result.update({"details": details})
 
+        # Get subject teacher comments
+        comments = frappe.get_all(
+            "Subject Teacher Comment",
+            {"parent": result.name},
+            ["course", "course_name", "comment"],
+        )
+        if comments:
+            result.update({"subject_teacher_comments": comments})
+
     return {"assessment_result": assessment_result, "courses": courses}
 
 
