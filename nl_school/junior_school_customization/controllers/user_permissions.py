@@ -122,6 +122,29 @@ def setup_instructor_user_on_create(doc, method=None):
     user.append("roles", {"role": "Instructor"})
     user.save(ignore_permissions=True)
     frappe.db.commit()
+    
+    # Remove blocking User Permissions (Employee/Company) that restrict access
+    # These are auto-created by Frappe but block Instructor from seeing other records
+    cleanup_instructor_user_permissions(user_id)
+
+
+def cleanup_instructor_user_permissions(user_id):
+    """
+    Remove Employee and Company User Permissions for instructors.
+    These permissions block instructors from accessing Instructor, Student Group,
+    and other doctypes needed for their work.
+    """
+    blocking = frappe.get_all(
+        "User Permission",
+        filters={"user": user_id, "allow": ["in", ["Employee", "Company"]]},
+        pluck="name"
+    )
+    
+    for perm_name in blocking:
+        frappe.delete_doc("User Permission", perm_name, ignore_permissions=True)
+    
+    if blocking:
+        frappe.db.commit()
 
 
 @frappe.whitelist()
