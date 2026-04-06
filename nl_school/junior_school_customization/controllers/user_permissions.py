@@ -125,7 +125,6 @@ def setup_instructor_user_on_create(doc, method=None):
 
 
 @frappe.whitelist()
-@frappe.whitelist()
 def get_instructor_student_groups(user=None):
     """
     Get list of student groups assigned to the current instructor.
@@ -135,12 +134,23 @@ def get_instructor_student_groups(user=None):
         user = frappe.session.user
 
     # Find employee linked to this user
-    employees = frappe.get_all("Employee", filters={"user_id": user}, pluck="name")
+    # Use ignore_permissions because User Permissions may block Employee access
+    employees = frappe.get_all(
+        "Employee",
+        filters={"user_id": user},
+        pluck="name",
+        ignore_permissions=True,
+    )
 
     if not employees:
         return []
 
-    instructors = frappe.get_all("Instructor", filters={"employee": ["in", employees]}, pluck="name")
+    instructors = frappe.get_all(
+        "Instructor",
+        filters={"employee": ["in", employees]},
+        pluck="name",
+        ignore_permissions=True,
+    )
 
     if not instructors:
         return []
@@ -149,7 +159,8 @@ def get_instructor_student_groups(user=None):
     student_groups = frappe.get_all(
         "Student Group Instructor",
         filters={"instructor": ["in", instructors]},
-        pluck="parent"
+        pluck="parent",
+        ignore_permissions=True,
     )
 
     return list(set(student_groups))
@@ -168,7 +179,8 @@ def get_instructor_students(user=None):
     students = frappe.get_all(
         "Student Group Student",
         filters={"parent": ["in", student_groups], "active": 1},
-        pluck="student"
+        pluck="student",
+        ignore_permissions=True,
     )
 
     return list(set(students))
