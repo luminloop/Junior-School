@@ -129,25 +129,10 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
   let allRooms = [];
   let isNewSchedule = false;
   let isTeacherView = false;
-  let teacherStudentGroups = [];
 
-  // Check if current user is an Instructor (teacher view = read-only)
+  // Check if current user is an Instructor (teacher view = read-only, no filters)
   if (frappe.user.has_role("Instructor") && !frappe.user.has_role("Academic Coordinator") && !frappe.user.has_role("Principal")) {
     isTeacherView = true;
-    // Fetch this teacher's student groups and auto-filter
-    frappe.call({
-      method: "nl_school.junior_school_customization.controllers.user_permissions.get_instructor_student_groups",
-      callback: function (r) {
-        if (r.message && r.message.length > 0) {
-          teacherStudentGroups = r.message;
-          // Auto-filter calendar to teacher's classes
-          selectedFilter = "stream";
-          selectedValue = teacherStudentGroups[0];
-          $("#stream-dropdown").val(selectedValue);
-          render_calendar(selectedFilter, selectedValue);
-        }
-      }
-    });
   }
 
   let customStyles = document.createElement("style");
@@ -297,86 +282,88 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
     `;
   document.head.appendChild(customStyles);
 
-  // Hide teacher dropdown and print button for teachers (auto-filtered)
+  // Hide filters and edit controls for teachers (read-only view)
   if (isTeacherView) {
-    $("#teacher-dropdown").closest(".form-group").hide();
+    // Hide all filter controls
+    $(".filter-controls").hide();
+    // Hide print button
     $(".print-btn-wrapper").hide();
+    // Hide modal edit controls
+    $("#save-schedule").hide();
   }
 
-  // Fetch teachers and populate dropdown
-  frappe.call({
-    method:
-      "nl_school.junior_school_customization.page.school_timetable.timetable.get_teachers",
-    callback: function (response) {
-      allTeachers = response.message;
-      let teacherDropdown = $("#teacher-dropdown");
-      let editInstructorDropdown = $("#edit-instructor");
-
-      response.message.forEach((teacher) => {
-        teacherDropdown.append(
-          `<option value="${teacher.value}">${teacher.label}</option>`,
-        );
-        editInstructorDropdown.append(
-          `<option value="${teacher.value}">${teacher.label}</option>`,
-        );
-      });
-    },
-  });
-
-  // Fetch streams and populate dropdown
-  frappe.call({
-    method:
-      "nl_school.junior_school_customization.page.school_timetable.timetable.get_streams",
-    callback: function (response) {
-      allStreams = response.message;
-      let streamDropdown = $("#stream-dropdown");
-      let editStudentGroupDropdown = $("#edit-student-group");
-
-      response.message.forEach((stream) => {
-        streamDropdown.append(
-          `<option value="${stream.value}">${stream.label}</option>`,
-        );
-        editStudentGroupDropdown.append(
-          `<option value="${stream.value}">${stream.label}</option>`,
-        );
-      });
-    },
-  });
-
-  frappe.call({
-    method:
-      "nl_school.junior_school_customization.page.school_timetable.timetable.get_rooms",
-    callback: function (response) {
-      allRooms = response.message;
-      let allRoomsDropdown = $("#edit-room");
-      response.message.forEach((room) => {
-        allRoomsDropdown.append(
-          `<option value="${room.value}">${room.label}</option>`,
-        );
-      });
-    },
-  });
-
-  // Fetch courses
-  frappe.call({
-    method:
-      "nl_school.junior_school_customization.page.school_timetable.timetable.get_courses",
-    callback: function (response) {
-      console.log("Here", response);
-
-      let allCoursesDropdown = $("#edit-course");
-      response.message.forEach((course) => {
-        allCoursesDropdown.append(
-          `<option value="${course.value}">${course.label}</option>`,
-        );
-      });
-    },
-  });
-
-  // Render calendar for non-teacher views (teacher view renders after fetching student groups)
+  // Fetch teachers and populate dropdown (skip for teachers)
   if (!isTeacherView) {
-    render_calendar();
+    frappe.call({
+      method:
+        "nl_school.junior_school_customization.page.school_timetable.timetable.get_teachers",
+      callback: function (response) {
+        allTeachers = response.message;
+        let teacherDropdown = $("#teacher-dropdown");
+        let editInstructorDropdown = $("#edit-instructor");
+
+        response.message.forEach((teacher) => {
+          teacherDropdown.append(
+            `<option value="${teacher.value}">${teacher.label}</option>`,
+          );
+          editInstructorDropdown.append(
+            `<option value="${teacher.value}">${teacher.label}</option>`,
+          );
+        });
+      },
+    });
+
+    // Fetch streams and populate dropdown
+    frappe.call({
+      method:
+        "nl_school.junior_school_customization.page.school_timetable.timetable.get_streams",
+      callback: function (response) {
+        allStreams = response.message;
+        let streamDropdown = $("#stream-dropdown");
+        let editStudentGroupDropdown = $("#edit-student-group");
+
+        response.message.forEach((stream) => {
+          streamDropdown.append(
+            `<option value="${stream.value}">${stream.label}</option>`,
+          );
+          editStudentGroupDropdown.append(
+            `<option value="${stream.value}">${stream.label}</option>`,
+          );
+        });
+      },
+    });
+
+    frappe.call({
+      method:
+        "nl_school.junior_school_customization.page.school_timetable.timetable.get_rooms",
+      callback: function (response) {
+        allRooms = response.message;
+        let allRoomsDropdown = $("#edit-room");
+        response.message.forEach((room) => {
+          allRoomsDropdown.append(
+            `<option value="${room.value}">${room.label}</option>`,
+          );
+        });
+      },
+    });
+
+    // Fetch courses
+    frappe.call({
+      method:
+        "nl_school.junior_school_customization.page.school_timetable.timetable.get_courses",
+      callback: function (response) {
+        let allCoursesDropdown = $("#edit-course");
+        response.message.forEach((course) => {
+          allCoursesDropdown.append(
+            `<option value="${course.value}">${course.label}</option>`,
+          );
+        });
+      },
+    });
   }
+
+  // Render calendar for all users
+  render_calendar();
 
   function render_calendar(filter_by = null, filter_value = "") {
     let calendarEl = document.getElementById("calendar");
