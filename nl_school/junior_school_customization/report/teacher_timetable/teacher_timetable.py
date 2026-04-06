@@ -1,11 +1,27 @@
 import frappe
 from frappe import _
+from datetime import timedelta
 
 
 def execute(filters=None):
     columns = get_columns()
     data = get_data(filters)
     return columns, data
+
+
+def format_time_slot(from_time, to_time):
+    """Convert time to HH:MM format, handling timedelta, datetime, and string."""
+    def format_single(t):
+        if isinstance(t, timedelta):
+            total_seconds = int(t.total_seconds())
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            return f"{hours:02d}:{minutes:02d}"
+        elif isinstance(t, str):
+            return t[:5]
+        else:
+            return t.strftime("%H:%M")
+    return format_single(from_time), format_single(to_time)
 
 
 def get_columns():
@@ -70,12 +86,7 @@ def get_data(filters):
     # Collect unique time slots
     time_slots_set = set()
     for s in schedules:
-        if isinstance(s.from_time, str):
-            start = s.from_time[:5]
-            end = s.to_time[:5]
-        else:
-            start = s.from_time.strftime("%H:%M")
-            end = s.to_time.strftime("%H:%M")
+        start, end = format_time_slot(s.from_time, s.to_time)
         time_slots_set.add((start, end))
 
     time_slots = sorted(time_slots_set)
@@ -86,12 +97,7 @@ def get_data(filters):
         day_of_week = s.schedule_date.weekday()
         if day_of_week > 4:
             continue
-        if isinstance(s.from_time, str):
-            start = s.from_time[:5]
-            end = s.to_time[:5]
-        else:
-            start = s.from_time.strftime("%H:%M")
-            end = s.to_time.strftime("%H:%M")
+        start, end = format_time_slot(s.from_time, s.to_time)
         key = (day_of_week, (start, end))
         if key not in schedule_map:
             schedule_map[key] = []
