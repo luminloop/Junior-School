@@ -7,13 +7,82 @@
   "doctype": "Workspace",
   "for_user": "",
   "hide_custom": 0,
-  "icon": "education",
+  "icon": "briefcase",
   "idx": 0,
-  "indicator_color": "blue",
+  "indicator_color": "green",
   "is_hidden": 0,
   "label": "Academic Coordinator",
-  "links": [],
-  "modified": "2026-04-06 10:00:00.000000",
+  "links": [
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Dashboard",
+      "link_count": 1,
+      "link_type": "Page",
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Coordinator Dashboard",
+      "link_count": 0,
+      "link_to": "coordinator-dashboard",
+      "link_type": "Page",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Tools",
+      "link_count": 4,
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Enhanced Program Enrollment Tool",
+      "link_count": 0,
+      "link_to": "Enhanced Program Enrollment Tool",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Enhanced Student Attendance Tool",
+      "link_count": 0,
+      "link_to": "Enhanced Student Attendance Tool",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Student Report Generation Tool",
+      "link_count": 0,
+      "link_to": "Student Report Generation Tool",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Batch Report Card",
+      "link_count": 0,
+      "link_to": "Batch Report Card",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    }
+  ],
+  "modified": "2026-04-06 18:45:00.000000",
   "modified_by": "Administrator",
   "module": "Junior School Customization",
   "name": "Academic Coordinator",
@@ -22,7 +91,6 @@
   "parent_page": "",
   "public": 1,
   "quick_lists": [],
-  "restrict_to_domain": "",
   "roles": [
     {
       "role": "Academic Coordinator"
@@ -34,36 +102,7 @@
       "role": "Principal"
     }
   ],
-  "sequence_id": 50.0,
-  "shortcuts": [
-    {
-      "color": "Blue",
-      "doc_view": "",
-      "label": "Dashboard",
-      "link_to": "coordinator-dashboard",
-      "type": "Page"
-    },
-    {
-      "color": "Grey",
-      "doc_view": "List",
-      "label": "Teachers",
-      "link_to": "Instructor",
-      "type": "DocType"
-    },
-    {
-      "color": "Grey",
-      "doc_view": "List",
-      "label": "Students",
-      "link_to": "Student",
-      "type": "DocType"
-    },
-    {
-      "color": "Grey",
-      "doc_view": "List",
-      "label": "Exams",
-      "link_to": "Assessment Plan",
-      "type": "DocType"
-    }
-  ],
+  "sequence_id": 20.0,
+  "shortcuts": [],
   "title": "Academic Coordinator"
 }

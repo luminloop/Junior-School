@@ -13,15 +13,6 @@
   "roles": [
     {
       "role": "Instructor"
-    },
-    {
-      "role": "Academic Coordinator"
-    },
-    {
-      "role": "Principal"
-    },
-    {
-      "role": "System Manager"
     }
   ],
   "script": null,
