@@ -229,13 +229,9 @@ def get_primary_template():
 <div class="report-card">
     <!-- School Header -->
     <div class="school-header">
-        {% if letterhead %}
-        {{ letterhead }}
-        {% else %}
-        <h1>{{ doc.school_name or "CBC School Name" }}</h1>
-        <p>P.O. Box XXXXX - City, Kenya | Tel: +254 XXX XXX XXX | Email: info@school.ac.ke</p>
-        <p><strong>Motto:</strong> Strive for Excellence | <strong>Reg. No:</strong> MIN/XXX/XXXX</p>
-        {% endif %}
+        <h1>{{ doc.company or "Lemana Junior School" }}</h1>
+        <p>P.O. Box 123 - Limuru, Kenya | Tel: +254 700 000 000 | Email: info@lemana.ac.ke</p>
+        <p><strong>Motto:</strong> Strive for Excellence | <strong>Reg. No:</strong> MIN/EDU/2024/089</p>
     </div>
 
     <!-- Report Title -->
@@ -634,13 +630,9 @@ def get_junior_secondary_template():
 <div class="report-card">
     <!-- School Header -->
     <div class="school-header">
-        {% if letterhead %}
-        {{ letterhead }}
-        {% else %}
-        <h1>{{ doc.school_name or "CBC Junior Secondary School" }}</h1>
-        <p>P.O. Box XXXXX - City, Kenya | Tel: +254 XXX XXX XXX | Email: info@school.ac.ke</p>
-        <p><strong>Motto:</strong> Strive for Excellence | <strong>Reg. No:</strong> MIN/XXX/XXXX</p>
-        {% endif %}
+        <h1>{{ doc.company or "Lemana Junior School" }}</h1>
+        <p>P.O. Box 123 - Limuru, Kenya | Tel: +254 700 000 000 | Email: info@lemana.ac.ke</p>
+        <p><strong>Motto:</strong> Strive for Excellence | <strong>Reg. No:</strong> MIN/EDU/2024/089</p>
     </div>
 
     <!-- Report Title -->

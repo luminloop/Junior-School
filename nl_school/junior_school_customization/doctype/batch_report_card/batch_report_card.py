@@ -37,11 +37,11 @@ def get_students_for_batch(academic_year, program=None, student_group=None):
     if program:
         filters["program"] = program
     
-    # Get students from Program Enrollment
+    # Get students from Program Enrollment (student_batch_name is the Student Group)
     enrollments = frappe.get_all(
         "Program Enrollment",
         filters=filters,
-        fields=["student", "student_name", "program", "student_group"],
+        fields=["student", "student_name", "program", "student_batch_name"],
     )
     
     # If student_group filter is specified, filter further
@@ -65,7 +65,7 @@ def get_students_for_batch(academic_year, program=None, student_group=None):
                 "student": e.student,
                 "student_name": e.student_name,
                 "program": e.program,
-                "student_group": e.student_group or student_group,
+                "student_group": e.student_batch_name or student_group,
             })
     
     return unique_students

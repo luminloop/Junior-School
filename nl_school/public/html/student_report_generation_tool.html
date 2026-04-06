@@ -404,7 +404,7 @@
 <div class="report-card">
     <!-- Header -->
     <div class="rc-header">
-        {% if student_image %}
+        {% if student_image and student_image.startswith('http') %}
         <img class="rc-student-photo" src="{{ student_image }}" alt="Student">
         {% else %}
         <div class="rc-student-photo" style="display:flex;align-items:center;justify-content:center;background:#e2e8f0;font-size:24px;color:#64748b;">
@@ -412,11 +412,7 @@
         </div>
         {% endif %}
         <div class="rc-school-info">
-            {% if letterhead %}
-            <div class="letterhead">{{ letterhead }}</div>
-            {% else %}
-            <p class="rc-school-name">{{ doc.school or "Lemana Junior School" }}</p>
-            {% endif %}
+            <p class="rc-school-name">{{ doc.company or "Lemana Junior School" }}</p>
             <p class="rc-school-subtitle">Competency-Based Curriculum • Junior Secondary</p>
             <p class="rc-title">Academic Report Card</p>
         </div>
@@ -654,7 +650,7 @@
             <div class="rc-signature-line"></div>
             <div class="rc-signature-label">Principal's Signature</div>
         </div>
-        {% if rubber_stamp %}
+        {% if rubber_stamp and rubber_stamp.startswith('http') %}
         <div class="rc-stamp">
             <img src="{{ rubber_stamp }}" alt="School Stamp">
         </div>

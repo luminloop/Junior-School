@@ -4,8 +4,8 @@ from frappe import _
 from frappe.desk.treeview import get_children
 
 import json
+import re
 from frappe.utils.pdf import get_pdf
-from frappe.www.printview import get_letter_head
 from frappe.model.document import Document
 
 # from education.education.report.course_wise_assessment_report.course_wise_assessment_report import (
@@ -50,7 +50,9 @@ def prepare_report_card_data(doc):
     class_teacher = get_class_teacher(doc.student)
     values = get_formatted_result(doc, get_course=True)
     assessment_groups = get_child_assessment_groups(doc.assessment_group)
-    letterhead = get_letter_head(doc, not doc.add_letterhead)
+    # Don't use letterhead for report cards - it contains Jinja code meant for invoices
+    # Instead we'll use a simple school header in the template
+    letterhead = None
 
     # Attendance data
     doc.attendance = get_attendance_count(
@@ -64,11 +66,12 @@ def prepare_report_card_data(doc):
 
     return {
         "doc": doc,
+        "attendance": doc.attendance,
         "values": values,
         "assessment_result": assessment_results,
         "courses": values.get("courses"),
         "assessment_groups": assessment_groups,
-        "letterhead": letterhead and letterhead.get("content", None),
+        "letterhead": None,
         "rubber_stamp": get_rubber_stamp(doc.student),
         "add_letterhead": doc.add_letterhead if doc.add_letterhead else 0,
         "averages": averages,
@@ -83,9 +86,33 @@ def prepare_report_card_data(doc):
     }
 
 
+def get_default_company():
+    company = None
+    try:
+        if frappe.get_meta("Education Settings").has_field("default_company"):
+            company = frappe.db.get_single_value("Education Settings", "default_company")
+    except Exception:
+        company = None
+
+    if not company:
+        try:
+            if frappe.get_meta("Global Defaults").has_field("default_company"):
+                company = frappe.db.get_single_value("Global Defaults", "default_company")
+        except Exception:
+            company = None
+
+    if not company:
+        company = frappe.defaults.get_user_default("Company")
+
+    if not company:
+        company = frappe.db.get_value("Company", {}, "name")
+
+    return company
+
+
 def get_rubber_stamp(student):
     try:
-        school = frappe.db.get_single_value("Education Settings", "default_company")
+        school = get_default_company()
         if not school:
             return None
         company = frappe.get_doc("Company", school)
@@ -102,7 +129,7 @@ def generate_pdf_response(doc, template_data):
     
     # If no template specified, try to get default for the company
     if not template_name:
-        company = frappe.db.get_single_value("Education Settings", "default_company")
+        company = get_default_company()
         template_name = get_default_template(company)
     
     # Get template HTML
@@ -454,10 +481,14 @@ def get_child_assessment_groups(assessment_group):
 
 
 def get_student_image(student):
-    student = frappe.get_doc("Student", student)
-    if student.image:
-        return student.image
-    else:
+    try:
+        student = frappe.get_doc("Student", student)
+        if student.image:
+            # Only return image if it's a valid URL (not a local file path)
+            if student.image.startswith('http'):
+                return student.image
+        return None
+    except Exception:
         return None
 
 
