@@ -202,6 +202,9 @@ doc_events = {
         "after_insert": "nl_school.junior_school_customization.controllers.user_permissions.setup_instructor_user_on_create",
         "on_update": "nl_school.junior_school_customization.controllers.user_permissions.setup_instructor_user_on_create",
     },
+    "User": {
+        "on_update": "nl_school.utils.workspace_permissions.auto_assign_workspace",
+    },
 }
 # Scheduled Tasks
 # ---------------
