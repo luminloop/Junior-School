@@ -24,6 +24,7 @@ def get_course_schedule(instructor=None, stream=None):
             "room",
             "program",
         ],
+        ignore_permissions=True,
     )
     return schedules
 
@@ -34,7 +35,7 @@ def get_course_schedule_details(schedule_name):
     if not schedule_name:
         return None
 
-    return frappe.get_doc("Course Schedule", schedule_name)
+    return frappe.get_doc("Course Schedule", schedule_name, ignore_permissions=True)
 
 
 @frappe.whitelist()
