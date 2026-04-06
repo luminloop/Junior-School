@@ -35,7 +35,26 @@
     {
       "hidden": 0,
       "is_query_report": 0,
-      "label": "Tools",
+      "label": "My Students",
+      "link_count": 1,
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "My Students",
+      "link_count": 0,
+      "link_to": "Student",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Daily Operations",
       "link_count": 3,
       "link_type": "DocType",
       "onboard": 0,
@@ -54,6 +73,64 @@
     {
       "hidden": 0,
       "is_query_report": 0,
+      "label": "Attendance Records",
+      "link_count": 0,
+      "link_to": "Student Attendance",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Timetable",
+      "link_count": 2,
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 1,
+      "label": "My Timetable",
+      "link_count": 0,
+      "link_to": "Teacher Timetable",
+      "link_type": "Report",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Course Schedule",
+      "link_count": 0,
+      "link_to": "Course Schedule",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Exams & Marks",
+      "link_count": 5,
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Exam Schedule",
+      "link_count": 0,
+      "link_to": "Assessment Plan",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
       "label": "Enter Marks",
       "link_count": 0,
       "link_to": "Assessment Result",
@@ -64,15 +141,64 @@
     {
       "hidden": 0,
       "is_query_report": 0,
-      "label": "My Timetable",
+      "label": "Bulk Enter Marks",
       "link_count": 0,
-      "link_to": "Teacher Timetable",
+      "link_to": "Assessment Result Tool",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Grading Scale",
+      "link_count": 0,
+      "link_to": "Grading Scale",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Grade Reports",
+      "link_count": 3,
+      "link_type": "Report",
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 1,
+      "label": "Final Grades",
+      "link_count": 0,
+      "link_to": "Enhanced Final Assessment Grades",
+      "link_type": "Report",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 1,
+      "label": "Class Performance",
+      "link_count": 0,
+      "link_to": "Average Performance per Stream",
+      "link_type": "Report",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 1,
+      "label": "Stream Analysis",
+      "link_count": 0,
+      "link_to": "Stream Wise Performance",
       "link_type": "Report",
       "onboard": 0,
       "type": "Link"
     }
   ],
-  "modified": "2026-04-06 18:50:00.000000",
+  "modified": "2026-04-06 19:00:00.000000",
   "modified_by": "Administrator",
   "module": "Junior School Customization",
   "name": "Teacher",

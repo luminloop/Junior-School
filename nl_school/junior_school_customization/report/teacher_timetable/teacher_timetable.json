@@ -5,5 +5,7 @@
 	"report_name": "Teacher Timetable",
 	"report_type": "Script Report",
 	"is_standard": "Yes",
-	"disabled": 0
+	"disabled": 0,
+	"module": "Junior School Customization",
+	"app": "nl_school"
 }
