@@ -1,0 +1,69 @@
+{
+  "charts": [],
+  "content": "[{\"id\":\"header_1\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Academic Coordinator Dashboard</span>\",\"col\":12}},{\"id\":\"spacer_1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"shortcut_dashboard\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"id\":\"shortcut_teachers\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Teachers\",\"col\":3}},{\"id\":\"shortcut_students\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Students\",\"col\":3}},{\"id\":\"shortcut_exams\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Exams\",\"col\":3}}]",
+  "creation": "2026-04-06 10:00:00.000000",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "for_user": "",
+  "hide_custom": 0,
+  "icon": "education",
+  "idx": 0,
+  "indicator_color": "blue",
+  "is_hidden": 0,
+  "label": "Academic Coordinator",
+  "links": [],
+  "modified": "2026-04-06 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Junior School Customization",
+  "name": "Academic Coordinator",
+  "number_cards": [],
+  "owner": "Administrator",
+  "parent_page": "",
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": "",
+  "roles": [
+    {
+      "role": "Academic Coordinator"
+    },
+    {
+      "role": "System Manager"
+    },
+    {
+      "role": "Principal"
+    }
+  ],
+  "sequence_id": 50.0,
+  "shortcuts": [
+    {
+      "color": "Blue",
+      "doc_view": "",
+      "label": "Dashboard",
+      "link_to": "coordinator-dashboard",
+      "type": "Page"
+    },
+    {
+      "color": "Grey",
+      "doc_view": "List",
+      "label": "Teachers",
+      "link_to": "Instructor",
+      "type": "DocType"
+    },
+    {
+      "color": "Grey",
+      "doc_view": "List",
+      "label": "Students",
+      "link_to": "Student",
+      "type": "DocType"
+    },
+    {
+      "color": "Grey",
+      "doc_view": "List",
+      "label": "Exams",
+      "link_to": "Assessment Plan",
+      "type": "DocType"
+    }
+  ],
+  "title": "Academic Coordinator"
+}

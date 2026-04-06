@@ -13,6 +13,11 @@ from frappe.model.document import Document
 # )
 from frappe.utils import now_datetime
 
+from nl_school.junior_school_customization.doctype.report_card_template.report_card_template import (
+    get_default_template,
+    get_template_html,
+)
+
 
 class StudentReportGenerationTool(Document):
     pass
@@ -80,7 +85,7 @@ def prepare_report_card_data(doc):
 
 def get_rubber_stamp(student):
     try:
-        school = frappe.get_value("Student", student, "company")
+        school = frappe.db.get_single_value("Education Settings", "default_company")
         if not school:
             return None
         company = frappe.get_doc("Company", school)
@@ -92,9 +97,26 @@ def get_rubber_stamp(student):
 
 def generate_pdf_response(doc, template_data):
     """Generate and return the PDF response"""
-    html = frappe.render_template(
-        "nl_school/public/html/student_report_generation_tool.html", template_data
-    )
+    # Check if a custom template is specified
+    template_name = doc.get("report_card_template")
+    
+    # If no template specified, try to get default for the company
+    if not template_name:
+        company = frappe.db.get_single_value("Education Settings", "default_company")
+        template_name = get_default_template(company)
+    
+    # Get template HTML
+    template_html = None
+    if template_name:
+        template_html = get_template_html(template_name)
+    
+    # Use custom template or fall back to default file
+    if template_html:
+        html = frappe.render_template(template_html, template_data)
+    else:
+        html = frappe.render_template(
+            "nl_school/public/html/student_report_generation_tool.html", template_data
+        )
 
     final_template = frappe.render_template(
         "frappe/www/printview.html", {"body": html, "title": "Report Card"}

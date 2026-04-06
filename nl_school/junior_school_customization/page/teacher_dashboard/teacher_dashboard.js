@@ -6,6 +6,7 @@ frappe.pages["teacher-dashboard"].on_page_load = function (wrapper) {
   });
 
   page.inner_page = true;
+  
   let dashboard = new TeacherDashboard(page);
 };
 
@@ -157,7 +158,7 @@ class TeacherDashboard {
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="section-title mb-0">${__("Attendance Trend")} <span class="text-muted font-weight-normal ml-2" style="font-size: 12px;">${__("Last 7 days")}</span></div>
               </div>
-              <div class="chart-container" id="attendance-chart"></div>
+              <div class="chart-container" id="teacher-attendance-chart"></div>
             </div>
 
             <!-- Recent Activity -->
@@ -272,6 +273,7 @@ class TeacherDashboard {
   }
 
   render_quick_actions() {
+    const instructor = this.data.instructor || {};
     const actions = [
       { label: "Mark Attendance", route: "/desk/enhanced-student-attendance-tool", icon: "tick" },
       { label: "Enter Marks", route: "/desk/assessment-result/new", icon: "edit" },
@@ -334,9 +336,6 @@ class TeacherDashboard {
                   <span style="font-size: 13px; font-weight: 500;" class="text-truncate">${s.course}</span>
                   <span class="text-muted" style="font-size: 11px;">${s.student_group_name || s.student_group} | ${s.from_time} - ${s.to_time}${s.room ? ' | Room: ' + s.room : ''}</span>
                 </div>
-                <a href="/desk/course-schedule/${s.name}" class="btn btn-xs btn-default" title="${__("View/Edit")}" style="margin-left: 8px;">
-                  ${frappe.utils.icon("edit", "xs")}
-                </a>
               </div>
             `).join("")}
           </div>
@@ -454,7 +453,7 @@ class TeacherDashboard {
     const data = this.data.attendance_trend || [];
 
     if (data.length === 0 || data.every(d => d.total === 0)) {
-      $("#attendance-chart").html(`
+      $("#teacher-attendance-chart").html(`
         <div class="empty-state">
           <div class="empty-state-icon" style="color: var(--gray-400);">
             ${frappe.utils.icon("chart", "lg")}
@@ -465,7 +464,7 @@ class TeacherDashboard {
       return;
     }
 
-    new frappe.Chart("#attendance-chart", {
+    new frappe.Chart("#teacher-attendance-chart", {
       data: {
         labels: data.map(d => d.date),
         datasets: [

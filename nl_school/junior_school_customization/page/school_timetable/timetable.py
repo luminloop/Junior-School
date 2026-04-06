@@ -43,6 +43,10 @@ def update_course_schedule(
     schedule_name, schedule_date=None, from_time=None, to_time=None
 ):
     """Update time and date of course schedule after drag/resize."""
+    # Instructors should not be able to update the timetable
+    if "Instructor" in frappe.get_roles() and "Education Manager" not in frappe.get_roles():
+        frappe.throw("You do not have permission to update the timetable", frappe.PermissionError)
+    
     try:
         if not schedule_name:
             return "error"
@@ -78,6 +82,10 @@ def update_course_schedule_details(
     to_time=None,
 ):
     """Update all details of a course schedule from the edit modal."""
+    # Instructors should not be able to update the timetable
+    if "Instructor" in frappe.get_roles() and "Education Manager" not in frappe.get_roles():
+        frappe.throw("You do not have permission to update the timetable", frappe.PermissionError)
+    
     try:
         if not schedule_name:
             return "error"
@@ -116,28 +124,28 @@ def update_course_schedule_details(
 @frappe.whitelist()
 def get_teachers():
     """Fetch all teachers."""
-    teachers = frappe.get_all("Instructor", fields=["name", "instructor_name"])
+    teachers = frappe.get_all("Instructor", fields=["name", "instructor_name"], ignore_permissions=True)
     return [{"value": t.name, "label": t.instructor_name} for t in teachers]
 
 
 @frappe.whitelist()
 def get_streams():
     """Fetch all streams."""
-    streams = frappe.get_all("Student Group", fields=["name", "program"])
+    streams = frappe.get_all("Student Group", fields=["name", "program"], ignore_permissions=True)
     return [{"value": s.name, "label": s.program} for s in streams]
 
 
 @frappe.whitelist()
 def get_rooms():
     """Fetch all rooms."""
-    rooms = frappe.get_all("Room", fields=["name", "room_name"])
+    rooms = frappe.get_all("Room", fields=["name", "room_name"], ignore_permissions=True)
     return [{"value": r.name, "label": r.room_name} for r in rooms]
 
 
 @frappe.whitelist()
 def get_courses():
     """Fetch all courses."""
-    courses = frappe.get_all("Course", fields=["name", "course_name"])
+    courses = frappe.get_all("Course", fields=["name", "course_name"], ignore_permissions=True)
     return [{"value": c.name, "label": c.course_name} for c in courses]
 
 
@@ -152,6 +160,10 @@ def create_course_schedule(
     to_time=None,
 ):
     """Create a new course schedule."""
+    # Instructors should not be able to create schedules
+    if "Instructor" in frappe.get_roles() and "Education Manager" not in frappe.get_roles():
+        frappe.throw("You do not have permission to create course schedules", frappe.PermissionError)
+    
     try:
         # Validate required fields
         if (

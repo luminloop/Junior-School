@@ -15,6 +15,30 @@ frappe.ui.form.on("Student Report Generation Tool", {
         },
       };
     });
+
+    if (!frm.fields_dict.custom_report_card_template) {
+      frm.add_custom_button(__("Select Template"), function() {
+        frappe.prompt({
+          fieldname: "template",
+          fieldtype: "Link",
+          label: "Report Card Template",
+          options: "Report Card Template",
+          get_query: function() {
+            return {
+              filters: {
+                disabled: 0
+              }
+            };
+          }
+        }, function(values) {
+          frm.template_name = values.template;
+          frappe.show_alert({
+            message: __("Template selected: ") + values.template,
+            indicator: "green"
+          });
+        }, __("Select Report Card Template"), __("Select"));
+      }, __("Template"));
+    }
   },
 
   refresh: function (frm) {
@@ -30,10 +54,16 @@ frappe.ui.form.on("Student Report Generation Tool", {
         frappe.throw(__("Please fill in all the mandatory fields."));
       }
 
+      let doc_with_template = Object.assign({}, frm.doc);
+      if (frm.template_name) {
+        doc_with_template.report_card_template = frm.template_name;
+      }
+
       let url =
         "/api/method/nl_school.junior_school_customization.controllers.student_report_generation_tool.preview_report_card";
-      open_url_post(url, { doc: frm.doc }, true);
+      open_url_post(url, { doc: doc_with_template }, true);
     });
+
     setTimeout(() => {
       const buttons = [...document.querySelectorAll(".btn")];
       const customButton = buttons.find(
@@ -46,25 +76,9 @@ frappe.ui.form.on("Student Report Generation Tool", {
         customButton.style.border = "none";
       }
     }, 50);
-  },
-  company: function (frm) {
-    frm.set_query("student", function () {
-      return {
-        filters: {
-          company: frm.doc.company,
-        },
-      };
-    });
-    if (frm.doc.company) {
-      frappe.db
-        .get_value("Company", frm.doc.company, "default_letter_head")
-        .then((r) => {
-          if (r.message && r.message.default_letter_head) {
-            frm.set_value("letter_head", r.message.default_letter_head);
-          } else {
-            frm.set_value("letter_head", null);
-          }
-        });
-    }
+
+    frm.add_custom_button(__("Manage Templates"), function() {
+      frappe.set_route("List", "Report Card Template");
+    }, __("Template"));
   },
 });

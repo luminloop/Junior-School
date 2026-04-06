@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:template_name",
+ "creation": "2025-04-06 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "template_name",
+  "is_default",
+  "description",
+  "column_break_1",
+  "company",
+  "disabled",
+  "section_break_template",
+  "template_html",
+  "section_break_preview",
+  "preview_info"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Default"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company (School)",
+   "options": "Company"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "section_break_template",
+   "fieldtype": "Section Break",
+   "label": "Template HTML"
+  },
+  {
+   "description": "Use Jinja templating. Available variables: doc, assessment_result, courses, assessment_groups, letterhead, averages, academic_term, class_teacher, student_image, rubber_stamp, date, values, show_opener, show_midterm, show_endterm",
+   "fieldname": "template_html",
+   "fieldtype": "Code",
+   "label": "Template HTML",
+   "options": "HTML",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_preview",
+   "fieldtype": "Section Break",
+   "label": "Help"
+  },
+  {
+   "fieldname": "preview_info",
+   "fieldtype": "HTML",
+   "label": "Preview Info",
+   "options": "<div class=\"alert alert-info\">\n<h5>Available Template Variables:</h5>\n<ul>\n<li><strong>doc</strong> - Student document with fields: student, student_name, program, academic_year, academic_term, attendance, etc.</li>\n<li><strong>assessment_result</strong> - List of assessment results with: student, student_name, course, assessment_group, total_score, grade, levels, percentage</li>\n<li><strong>courses</strong> - List of course names</li>\n<li><strong>assessment_groups</strong> - List of assessment group names</li>\n<li><strong>letterhead</strong> - Letter head HTML content</li>\n<li><strong>averages</strong> - Dict with opener, mid_term, end_term averages (each has score, grade, levels)</li>\n<li><strong>class_teacher</strong> - Class teacher name</li>\n<li><strong>student_image</strong> - URL to student photo</li>\n<li><strong>rubber_stamp</strong> - URL to school rubber stamp image</li>\n<li><strong>date</strong> - Current date/time</li>\n<li><strong>show_opener, show_midterm, show_endterm</strong> - Boolean flags for which exams to show</li>\n</ul>\n<h5>Example Usage:</h5>\n<pre>{{ doc.student_name }}\n{% for result in assessment_result %}\n  {{ result.course }}: {{ result.total_score }}\n{% endfor %}</pre>\n</div>"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-04-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Junior School Customization",
+ "name": "Report Card Template",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Education Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Instructor"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

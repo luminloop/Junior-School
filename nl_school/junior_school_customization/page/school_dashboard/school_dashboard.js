@@ -1,11 +1,12 @@
 frappe.pages["school-dashboard"].on_page_load = function (wrapper) {
   var page = frappe.ui.make_app_page({
     parent: wrapper,
-    title: "Student Overview",
+    title: "Dashboard",
     single_column: true,
   });
 
   page.inner_page = true;
+  
   let dashboard = new SchoolDashboard(page);
 };
 

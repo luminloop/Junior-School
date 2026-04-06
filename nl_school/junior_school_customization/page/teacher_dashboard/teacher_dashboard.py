@@ -35,12 +35,10 @@ def get_dashboard_data():
 
 def get_current_instructor(user):
     """Get the instructor record for the current user"""
-    # Find employee linked to user
     employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
     if not employee:
         return None
     
-    # Find instructor linked to employee
     instructor = frappe.db.get_value("Instructor", {"employee": employee}, ["name", "instructor_name"], as_dict=True)
     return instructor
 
@@ -50,14 +48,12 @@ def get_stats(instructor):
     today = nowdate()
     instructor_name = instructor.get("name")
     
-    # Get student groups assigned to this instructor
     student_groups = frappe.get_all(
         "Student Group Instructor",
         filters={"instructor": instructor_name},
         pluck="parent"
     )
     
-    # Total students in my classes
     total_students = 0
     if student_groups:
         total_students = frappe.db.count(
@@ -65,10 +61,8 @@ def get_stats(instructor):
             filters={"parent": ["in", student_groups], "active": 1}
         )
     
-    # My classes count
     total_classes = len(student_groups)
     
-    # Today's attendance marked (for my classes)
     attendance_marked = 0
     if student_groups:
         attendance_marked = frappe.db.count(
@@ -79,7 +73,6 @@ def get_stats(instructor):
             }
         )
     
-    # Pending assessment results (draft or pending approval)
     pending_results = frappe.db.count(
         "Assessment Result",
         filters={
@@ -88,7 +81,6 @@ def get_stats(instructor):
         }
     )
     
-    # Submitted results awaiting approval
     pending_approval = frappe.db.sql("""
         SELECT COUNT(*) as count FROM `tabAssessment Result`
         WHERE docstatus = 0 
@@ -132,7 +124,6 @@ def get_pending_results(instructor):
     """Get assessment results that need attention"""
     instructor_name = instructor.get("name")
     
-    # Get student groups
     student_groups = frappe.get_all(
         "Student Group Instructor",
         filters={"instructor": instructor_name},
@@ -166,7 +157,6 @@ def get_attendance_trend(instructor):
     instructor_name = instructor.get("name")
     today = getdate(nowdate())
     
-    # Get student groups
     student_groups = frappe.get_all(
         "Student Group Instructor",
         filters={"instructor": instructor_name},
@@ -207,7 +197,6 @@ def get_upcoming_assessments(instructor):
     instructor_name = instructor.get("name")
     today = nowdate()
     
-    # Get student groups
     student_groups = frappe.get_all(
         "Student Group Instructor",
         filters={"instructor": instructor_name},
@@ -241,7 +230,6 @@ def get_recent_activity(instructor):
     instructor_name = instructor.get("name")
     activities = []
     
-    # Get student groups
     student_groups = frappe.get_all(
         "Student Group Instructor",
         filters={"instructor": instructor_name},
@@ -251,7 +239,6 @@ def get_recent_activity(instructor):
     if not student_groups:
         return []
     
-    # Recent assessment results submitted
     recent_results = frappe.db.sql("""
         SELECT 
             ar.student_name,
@@ -272,7 +259,6 @@ def get_recent_activity(instructor):
             "time": result.modified,
         })
     
-    # Recent attendance marked
     recent_attendance = frappe.db.sql("""
         SELECT 
             sa.student_name,
@@ -292,23 +278,20 @@ def get_recent_activity(instructor):
             "time": att.modified,
         })
     
-    # Sort by time and limit
     activities.sort(key=lambda x: x["time"], reverse=True)
     
     return activities[:8]
 
 
 def get_my_timetable(instructor):
-    """
-    Get this week's timetable for the instructor.
-    Returns a list of days with their schedules.
-    """
+    """Get this week's timetable for the instructor."""
+    from datetime import timedelta
+    
     instructor_name = instructor.get("name")
     today = getdate(nowdate())
-    monday = today - frappe.utils.getdate(today).weekday() * frappe.utils.timedelta(days=1)
-    sunday = monday + frappe.utils.timedelta(days=6)
+    monday = today - timedelta(days=today.weekday())
+    sunday = monday + timedelta(days=6)
     
-    # Get student groups
     student_groups = frappe.get_all(
         "Student Group Instructor",
         filters={"instructor": instructor_name},
@@ -318,7 +301,6 @@ def get_my_timetable(instructor):
     if not student_groups:
         return []
     
-    # Get course schedules for this week
     schedules = frappe.db.sql("""
         SELECT 
             cs.name,
@@ -341,7 +323,6 @@ def get_my_timetable(instructor):
         "sunday": sunday,
     }, as_dict=True)
     
-    # Group by day
     days_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     timetable = {}
     
@@ -365,7 +346,6 @@ def get_my_timetable(instructor):
             "title": sched.title,
         })
     
-    # Sort by day order and return
     result = []
     for day in days_order:
         if day in timetable:

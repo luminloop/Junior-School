@@ -32,6 +32,7 @@ def get_data(data, filters):
                 "Student Group Student",
                 filters={"parent": stream.name},
                 pluck="student",
+                ignore_permissions=True,
             )
             all_students.extend(students)
         # Remove duplicates
@@ -42,6 +43,7 @@ def get_data(data, filters):
             "Student Group Student",
             {"parent": filters.get("student_group")},
             pluck="student",
+            ignore_permissions=True,
         )
 
     values = get_formatted_result(args, get_course=True)
@@ -149,5 +151,6 @@ def get_streams(program):
             fields=[
                 "name",
             ],
+            ignore_permissions=True,
         )
     return streams
