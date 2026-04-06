@@ -8,7 +8,7 @@
   "items": [
     {
       "child": 0,
-      "collapsible": 1,
+      "collapsible": 0,
       "icon": "house",
       "indent": 0,
       "keep_closed": 0,
@@ -24,7 +24,7 @@
       "icon": "users",
       "indent": 0,
       "keep_closed": 0,
-      "label": "Students",
+      "label": "All Students",
       "link_to": "Student",
       "link_type": "DocType",
       "show_arrow": 0,
@@ -523,7 +523,7 @@
       "type": "Link"
     }
   ],
-  "modified": "2026-04-06 18:30:00.000000",
+  "modified": "2026-04-06 18:35:00.000000",
   "modified_by": "Administrator",
   "module": "Junior School Customization",
   "name": "Academic Coordinator",
