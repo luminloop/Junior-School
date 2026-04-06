@@ -444,6 +444,6 @@
   "module": "Junior School Customization",
   "name": "Academic Coordinator",
   "owner": "Administrator",
-  "standard": 1,
+  "standard": 0,
   "title": "Academic Coordinator"
 }

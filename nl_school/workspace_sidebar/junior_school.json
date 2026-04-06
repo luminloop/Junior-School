@@ -466,6 +466,6 @@
  "module": "Junior School Customization",
  "name": "Junior School",
  "owner": "Administrator",
- "standard": 1,
+  "standard": 0,
  "title": "Junior School"
 }
