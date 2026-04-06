@@ -14,6 +14,8 @@ required_apps = ["education"]
 
 # Fixtures - data to be imported on install/migrate
 fixtures = [
+    {"dt": "Workspace", "filters": [["name", "in", ["Teacher", "Academic Coordinator", "Junior School"]]]},
+    {"dt": "Workspace Sidebar", "filters": [["name", "in", ["Academic Coordinator", "Teacher"]]]},
     {"dt": "Workflow State", "filters": [["workflow_state_name", "in", ["Draft", "Pending Approval", "Approved", "Rejected"]]]},
     {"dt": "Workflow Action Master", "filters": [["workflow_action_name", "in", ["Submit for Approval", "Approve", "Reject", "Revise"]]]},
     {"dt": "Workflow", "filters": [["workflow_name", "=", "Assessment Result Approval"]]},
@@ -315,6 +317,15 @@ scheduler_events = {
 # auth_hooks = [
 # 	"nl_school.auth.validate"
 # ]
+
+# Workspace permission restrictions
+permission_query_conditions = {
+    "Workspace": "nl_school.utils.workspace_permissions.get_workspace_permissions",
+}
+
+has_permission = {
+    "Workspace": "nl_school.utils.workspace_permissions.has_workspace_permission",
+}
 
 # Automatically update python controller files with type annotations for this app.
 # export_python_type_annotations = True

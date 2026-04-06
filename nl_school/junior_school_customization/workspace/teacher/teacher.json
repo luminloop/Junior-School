@@ -166,14 +166,14 @@
   "number_cards": [],
   "owner": "Administrator",
   "parent_page": "",
-  "public": 1,
+  "public": 0,
   "quick_lists": [],
   "roles": [
     {
       "role": "Instructor"
     }
   ],
-  "sequence_id": 30.0,
+  "sequence_id": 1.0,
   "shortcuts": [],
   "title": "Teacher"
 }

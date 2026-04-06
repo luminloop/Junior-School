@@ -89,11 +89,14 @@
   "number_cards": [],
   "owner": "Administrator",
   "parent_page": "",
-  "public": 1,
+  "public": 0,
   "quick_lists": [],
   "roles": [
     {
       "role": "Academic Coordinator"
+    },
+    {
+      "role": "Education Manager"
     },
     {
       "role": "System Manager"
@@ -102,7 +105,7 @@
       "role": "Principal"
     }
   ],
-  "sequence_id": 20.0,
+  "sequence_id": 2.0,
   "shortcuts": [],
   "title": "Academic Coordinator"
 }
