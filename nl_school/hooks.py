@@ -77,6 +77,8 @@ doctype_calendar_js = {"Course Schedule": "public/js/course_schedule_calendar.js
 # include app icons in desk
 # app_include_icons = "nl_school/public/icons.svg"
 
+app_include_js = "/assets/nl_school/js/school_dashboard_redirect.js"
+
 # Home Pages
 # ----------
 
