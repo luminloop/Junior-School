@@ -175,17 +175,20 @@
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [
-   {
-     "role": "Education Manager"
-   },
-   {
-     "role": "System Manager"
-   },
-   {
-     "role": "Principal"
-   }
- ],
+  "roles": [
+    {
+      "role": "Education Manager"
+    },
+    {
+      "role": "System Manager"
+    },
+    {
+      "role": "Principal"
+    },
+    {
+      "role": "Instructor"
+    }
+  ],
  "sequence_id": 49.0,
  "shortcuts": [
   {
