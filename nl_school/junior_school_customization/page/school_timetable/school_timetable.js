@@ -137,9 +137,60 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
 
   let customStyles = document.createElement("style");
   customStyles.innerHTML = `
-        /* Increase time row height */
+        /* FullCalendar Theme Overrides - Match Frappe/ERPNext */
+        .fc {
+            --fc-border-color: var(--border-color);
+            --fc-button-bg-color: var(--bg-primary);
+            --fc-button-border-color: var(--bg-primary);
+            --fc-button-hover-bg-color: var(--bg-primary-dark);
+            --fc-button-hover-border-color: var(--bg-primary-dark);
+            --fc-button-active-bg-color: var(--bg-primary-dark);
+            --fc-button-active-border-color: var(--bg-primary-dark);
+            --fc-today-bg-color: var(--bg-color);
+            font-family: var(--font-family);
+            font-size: var(--text-sm);
+        }
+        
+        .fc .fc-button {
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            text-transform: capitalize;
+        }
+        
+        .fc .fc-toolbar-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .fc .fc-col-header-cell-cushion,
+        .fc .fc-daygrid-day-number {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        
+        .fc .fc-daygrid-day.fc-day-today {
+            background-color: var(--bg-light-gray);
+        }
+        
+        .fc-event {
+            border-radius: var(--border-radius-sm);
+            padding: 2px 4px;
+            font-size: var(--text-xs);
+        }
+        
         .fc-timegrid-slot {
             height: 60px !important;
+        }
+        
+        .fc-timegrid-slot-label-cushion {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+        }
+        
+        .fc-event-title {
+            font-weight: 500;
         }
 
         /* Print button default positioning */
@@ -152,6 +203,19 @@ frappe.pages["school-timetable"].on_page_load = function (wrapper) {
 
         .timetable-controls {
             position: relative;
+        }
+        
+        /* Filter controls styling */
+        .filter-controls .form-group {
+            margin-bottom: 0;
+        }
+        
+        .filter-controls select {
+            border-radius: var(--border-radius);
+        }
+        
+        .filter-controls .btn {
+            border-radius: var(--border-radius);
         }
 
         /* Mobile responsive styles */
