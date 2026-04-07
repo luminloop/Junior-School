@@ -97,7 +97,7 @@ def setup_role_permissions():
     
     instructor_tools = [
         "Student Attendance Tool", "Assessment Result Tool",
-        "Enhanced Student Attendance Tool",
+        "Enhanced Student Attendance Tool", "Student Group",
     ]
     
     # Add Principal permissions
@@ -124,14 +124,14 @@ def setup_role_permissions():
     # Add Instructor (Teacher) permissions
     for doctype in instructor_access:
         # Teachers get read access to most, write to specific ones
-        perms = {"read": 1, "report": 1, "print": 1}
+        perms = {"read": 1, "report": 1, "print": 1, "if_no_user_permissions": 1}
         if doctype in ["Assessment Result", "Student Attendance", "Student Log"]:
             perms.update({"write": 1, "create": 1, "submit": 1})
         add_permission_if_not_exists(doctype, "Instructor", perms)
     
     for doctype in instructor_tools:
         add_permission_if_not_exists(doctype, "Instructor", {
-            "read": 1, "write": 1, "create": 1
+            "read": 1, "write": 1, "create": 1, "if_no_user_permissions": 1
         })
     
     frappe.db.commit()
