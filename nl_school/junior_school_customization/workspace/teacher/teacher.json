@@ -91,11 +91,11 @@
     },
     {
       "hidden": 0,
-      "is_query_report": 1,
-      "label": "My Timetable",
+      "is_query_report": 0,
+      "label": "View Timetable",
       "link_count": 0,
-      "link_to": "Teacher Timetable",
-      "link_type": "Report",
+      "link_to": "school-timetable",
+      "link_type": "Page",
       "onboard": 0,
       "type": "Link"
     },
