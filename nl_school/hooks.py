@@ -203,7 +203,7 @@ doc_events = {
         "on_update": "nl_school.junior_school_customization.controllers.user_permissions.setup_instructor_user_on_create",
     },
     "User": {
-        "on_update": "nl_school.utils.workspace_permissions.auto_assign_workspace",
+        "on_update": "nl_school.utils.auto_assign_workspace",
     },
 }
 # Scheduled Tasks
@@ -323,11 +323,11 @@ scheduler_events = {
 
 # Workspace permission restrictions
 permission_query_conditions = {
-    "Workspace": "nl_school.utils.workspace_permissions.get_workspace_permissions",
+    "Workspace": "nl_school.utils.get_workspace_permissions",
 }
 
 has_permission = {
-    "Workspace": "nl_school.utils.workspace_permissions.has_workspace_permission",
+    "Workspace": "nl_school.utils.has_workspace_permission",
 }
 
 # Automatically update python controller files with type annotations for this app.
