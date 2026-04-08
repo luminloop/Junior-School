@@ -14,12 +14,8 @@ def check_role():
 def get_dashboard_data():
     """Get dashboard data for school"""
     
-    # Get current academic year - check for is_current or is_active based on available field
-    academic_year = frappe.db.get_value("Academic Year", {"is_current": 1}, "name")
-    
-    if not academic_year:
-        # Try getting the most recent one
-        academic_year = frappe.db.get_value("Academic Year", order_by="year_start_date DESC", limit=1)
+    # Get most recent academic year based on start date
+    academic_year = frappe.db.get_value("Academic Year", order_by="year_start_date DESC", limit=1)
     
     if not academic_year:
         return {
