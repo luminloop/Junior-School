@@ -14,8 +14,12 @@ def check_role():
 def get_dashboard_data():
     """Get dashboard data for school"""
     
-    # Get current academic year
-    academic_year = frappe.db.get_value("Academic Year", {"is_active": 1}, "name")
+    # Get current academic year - check for is_current or is_active based on available field
+    academic_year = frappe.db.get_value("Academic Year", {"is_current": 1}, "name")
+    
+    if not academic_year:
+        # Try getting the most recent one
+        academic_year = frappe.db.get_value("Academic Year", order_by="year_start_date DESC", limit=1)
     
     if not academic_year:
         return {
@@ -31,8 +35,8 @@ def get_dashboard_data():
     # Teacher/Instructor count
     teachers = frappe.db.count("Instructor", {"enabled": 1})
     
-    # Program count
-    programs = frappe.db.count("Program", {"is_active": 1})
+    # Program count - check for is_active or enabled based on available field
+    programs = frappe.db.count("Program", {"enabled": 1})
     
     # Enrollment count
     enrollments = frappe.db.count("Program Enrollment", {"academic_year": academic_year})
