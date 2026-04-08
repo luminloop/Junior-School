@@ -177,6 +177,10 @@ class ModifiedStudentAttendance(StudentAttendance):
 class ModifiedStudent(Student):
     def validate(self):
         """Create a website user for student creation if not already exists"""
+        
+        # Skip if no custom_student_id (e.g., during enrollment from applicant)
+        if not self.custom_student_id:
+            return
 
         safe_username = re.sub(r"\W+", "", self.custom_student_id)
 
