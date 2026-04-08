@@ -28,14 +28,14 @@ def get_dashboard_data():
             "enrollments": 0
         }
     
-    # Student count
-    students = frappe.db.count("Student", {"academic_year": academic_year})
+    # Student count (use Program Enrollment for academic year)
+    students = frappe.db.count("Program Enrollment", {"academic_year": academic_year})
     
     # Teacher/Instructor count
     teachers = frappe.db.count("Instructor", {"enabled": 1})
     
-    # Program count - check for is_active or enabled based on available field
-    programs = frappe.db.count("Program", {"enabled": 1})
+    # Program count
+    programs = frappe.db.count("Program")
     
     # Enrollment count
     enrollments = frappe.db.count("Program Enrollment", {"academic_year": academic_year})
