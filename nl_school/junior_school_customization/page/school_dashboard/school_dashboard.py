@@ -15,7 +15,10 @@ def get_dashboard_data():
     """Get dashboard data for school"""
     
     # Get most recent academic year based on start date
-    academic_year = frappe.db.get_value("Academic Year", order_by="year_start_date DESC", limit=1)
+    latest_year = frappe.get_all(
+        "Academic Year", fields=["name"], order_by="year_start_date DESC", limit=1
+    )
+    academic_year = latest_year[0].name if latest_year else None
     
     if not academic_year:
         return {
