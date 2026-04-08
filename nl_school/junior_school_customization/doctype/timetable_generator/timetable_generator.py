@@ -5,6 +5,188 @@ from datetime import datetime, timedelta, time
 import json
 
 
+@frappe.whitelist()
+def import_from_previous_term(source_term):
+    """Import subject rules, time slots, and teacher preferences from a previous term."""
+    try:
+        if not source_term:
+            return {"success": False, "error": "Source term is required"}
+
+        # Get source timetable generator config
+        source_config = frappe.db.get_value(
+            "Timetable Generator",
+            {"academic_term": source_term},
+            "name"
+        )
+
+        if not source_config:
+            return {"success": False, "error": f"No Timetable Generator configuration found for {source_term}"}
+
+        source_doc = frappe.get_doc("Timetable Generator", source_config)
+
+        # Get current timetable generator
+        current_doc = frappe.get_single("Timetable Generator")
+
+        # Import subject rules
+        current_doc.subject_rules = []
+        for rule in source_doc.subject_rules:
+            current_doc.append("subject_rules", {
+                "subject": rule.subject,
+                "frequency_per_week": rule.frequency_per_week,
+                "allow_double": rule.allow_double,
+                "max_time": rule.max_time
+            })
+
+        # Import time slots
+        current_doc.time_slots = []
+        for slot in source_doc.time_slots:
+            current_doc.append("time_slots", {
+                "period": slot.period,
+                "start_time": slot.start_time,
+                "end_time": slot.end_time
+            })
+
+        # Import breaks
+        current_doc.breaks = []
+        for break_item in source_doc.breaks:
+            current_doc.append("breaks", {
+                "break_name": break_item.break_name,
+                "start_time": break_item.start_time,
+                "end_time": break_item.end_time
+            })
+
+        # Import teacher preferences
+        current_doc.teachers_preference = []
+        for pref in source_doc.teachers_preference:
+            current_doc.append("teachers_preference", {
+                "teacher": pref.teacher,
+                "subject": pref.subject,
+                "stream": pref.stream,
+                "max_period_per_day": pref.max_period_per_day,
+                "max_period_per_week": pref.max_period_per_week,
+                "preferred_days": pref.preferred_days
+            })
+
+        # Import teaching rooms
+        current_doc.teaching_rooms = []
+        for room in source_doc.teaching_rooms:
+            current_doc.append("teaching_rooms", {
+                "room": room.room,
+                "capacity": room.capacity
+            })
+
+        # Copy other settings
+        current_doc.lesson_starts = source_doc.lesson_starts
+        current_doc.lesson_ends = source_doc.lesson_ends
+        current_doc.default_time_slot = source_doc.default_time_slot
+        current_doc.default_maximum_lessons_per_day = source_doc.default_maximum_lessons_per_day
+        current_doc.default_maximum_lessons_per_week = source_doc.default_maximum_lessons_per_week
+
+        current_doc.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        return {"success": True, "message": "Configuration imported successfully"}
+
+    except Exception as e:
+        frappe.db.rollback()
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def copy_from_previous_term(source_term, target_term, overwrite=0):
+    """Copy course schedules from a previous term to the current term."""
+    try:
+        if not source_term or not target_term:
+            return {"success": False, "error": "Source and target terms are required"}
+
+        # Get source term dates
+        source_term_doc = frappe.get_doc("Academic Term", source_term)
+        target_term_doc = frappe.get_doc("Academic Term", target_term)
+
+        # Get source course schedules
+        source_schedules = frappe.get_all(
+            "Course Schedule",
+            filters={"academic_term": source_term},
+            fields=["name", "course", "instructor", "student_group", "room", "from_time", "to_time", "schedule_date", "company"]
+        )
+
+        if not source_schedules:
+            return {"success": False, "error": f"No course schedules found for {source_term}"}
+
+        # Calculate date offset
+        date_offset = (target_term_doc.term_start_date - source_term_doc.term_start_date).days
+
+        # Get day mapping (source day of week -> target day of week)
+        # We need to map weekdays
+        source_start = source_term_doc.term_start_date
+        target_start = target_term_doc.term_start_date
+
+        copied_count = 0
+        skipped_count = 0
+
+        for schedule in source_schedules:
+            # Get the day of week from source schedule's date
+            if schedule.schedule_date:
+                source_date = schedule.schedule_date
+                day_of_week = source_date.weekday()  # 0=Monday
+
+                # Find corresponding date in target term
+                # Calculate the nth weekday from target start
+                target_date = target_start + timedelta(days=(day_of_week - target_start.weekday()) % 7)
+
+                # Add weeks offset to match the position in term
+                # Simple approach: use the same day of week position
+                # This won't be perfect but gives a reasonable starting point
+                weeks_offset = (source_date - source_start).days // 7
+                final_date = target_date + timedelta(weeks=weeks_offset)
+
+                # Check if final date is within target term
+                if final_date > target_term_doc.term_end_date:
+                    final_date = target_date  # Fall back to first matching day
+
+                # Check if schedule already exists
+                if not overwrite:
+                    exists = frappe.db.exists("Course Schedule", {
+                        "academic_term": target_term,
+                        "student_group": schedule.student_group,
+                        "course": schedule.course,
+                        "schedule_date": final_date,
+                        "from_time": schedule.from_time
+                    })
+                    if exists:
+                        skipped_count += 1
+                        continue
+
+                # Create new schedule
+                new_schedule = frappe.get_doc({
+                    "doctype": "Course Schedule",
+                    "academic_year": target_term_doc.academic_year,
+                    "academic_term": target_term,
+                    "company": schedule.company,
+                    "course": schedule.course,
+                    "instructor": schedule.instructor,
+                    "student_group": schedule.student_group,
+                    "room": schedule.room,
+                    "schedule_date": final_date,
+                    "from_time": schedule.from_time,
+                    "to_time": schedule.to_time
+                })
+                new_schedule.insert(ignore_permissions=True)
+                copied_count += 1
+
+        frappe.db.commit()
+
+        return {
+            "success": True,
+            "count": copied_count,
+            "message": f"Copied {copied_count} schedules, skipped {skipped_count} (already exist)"
+        }
+
+    except Exception as e:
+        frappe.db.rollback()
+        return {"success": False, "error": str(e)}
+
+
 class TimetableGenerator(Document):
     pass
 
