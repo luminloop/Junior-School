@@ -1,0 +1,181 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "field:template_name",
+  "creation": "2026-04-09 10:00:00.000000",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "template_name",
+    "is_default",
+    "description",
+    "column_break_1",
+    "company",
+    "disabled",
+    "section_break_style",
+    "header_color",
+    "break_color",
+    "column_break_style",
+    "row_odd_color",
+    "row_even_color",
+    "section_break_template",
+    "template_html",
+    "section_break_css",
+    "custom_css",
+    "section_break_preview",
+    "preview_info"
+  ],
+  "fields": [
+    {
+      "fieldname": "template_name",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Template Name",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "default": "0",
+      "fieldname": "is_default",
+      "fieldtype": "Check",
+      "in_list_view": 1,
+      "label": "Is Default"
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "label": "Description"
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company (School)",
+      "options": "Company"
+    },
+    {
+      "default": "0",
+      "fieldname": "disabled",
+      "fieldtype": "Check",
+      "label": "Disabled"
+    },
+    {
+      "fieldname": "section_break_style",
+      "fieldtype": "Section Break",
+      "label": "Style Settings"
+    },
+    {
+      "default": "#f3f4f6",
+      "description": "Background color for the header row (default: light gray #f3f4f6)",
+      "fieldname": "header_color",
+      "fieldtype": "Color",
+      "label": "Header Background Color"
+    },
+    {
+      "default": "#ffe4e6",
+      "description": "Background color for break periods (default: rose red #ffe4e6)",
+      "fieldname": "break_color",
+      "fieldtype": "Color",
+      "label": "Break Period Color"
+    },
+    {
+      "fieldname": "column_break_style",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "#ffffff",
+      "description": "Background color for odd rows (default: white #ffffff)",
+      "fieldname": "row_odd_color",
+      "fieldtype": "Color",
+      "label": "Odd Row Color"
+    },
+    {
+      "default": "#f9fafb",
+      "description": "Background color for even rows (default: light gray #f9fafb)",
+      "fieldname": "row_even_color",
+      "fieldtype": "Color",
+      "label": "Even Row Color"
+    },
+    {
+      "fieldname": "section_break_template",
+      "fieldtype": "Section Break",
+      "label": "Template HTML (Optional)"
+    },
+    {
+      "description": "Optional: Custom Jinja template for timetable. Leave empty to use default layout. Available variables: timetable_data, days, time_slots, company, academic_year, academic_term, level, stream",
+      "fieldname": "template_html",
+      "fieldtype": "Code",
+      "label": "Template HTML",
+      "options": "HTML"
+    },
+    {
+      "fieldname": "section_break_css",
+      "fieldtype": "Section Break",
+      "label": "Custom CSS (Optional)"
+    },
+    {
+      "description": "Additional CSS styles for the timetable print",
+      "fieldname": "custom_css",
+      "fieldtype": "Code",
+      "label": "Custom CSS",
+      "options": "CSS"
+    },
+    {
+      "fieldname": "section_break_preview",
+      "fieldtype": "Section Break",
+      "label": "Help"
+    },
+    {
+      "fieldname": "preview_info",
+      "fieldtype": "HTML",
+      "label": "Preview Info",
+      "options": "<div class=\"alert alert-info\">\n<h5>Style Settings</h5>\n<p>Use the color pickers above to customize the timetable appearance. Changes will be applied when printing.</p>\n<h5>Available Template Variables (if using custom HTML):</h5>\n<ul>\n<li><strong>timetable_data</strong> - Dict with day as key, containing list of scheduled courses</li>\n<li><strong>days</strong> - List of day names (Monday-Friday)</li>\n<li><strong>time_slots</strong> - List of time slot objects with start_time and end_time</li>\n<li><strong>company</strong> - School name</li>\n<li><strong>academic_year</strong> - Current academic year</li>\n<li><strong>academic_term</strong> - Current academic term</li>\n<li><strong>level</strong> - Class/Grade level</li>\n<li><strong>stream</strong> - Stream name (if applicable)</li>\n</ul>\n</div>"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2026-04-09 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Junior School Customization",
+  "name": "Timetable Template",
+  "naming_rule": "By fieldname",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Education Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "read": 1,
+      "role": "Instructor"
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": [],
+  "track_changes": 1
+}

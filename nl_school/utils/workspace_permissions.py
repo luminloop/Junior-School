@@ -12,15 +12,14 @@ import frappe
 ROLE_WORKSPACE_MAP = {
     "Instructor": "Teacher",
     "Academic Coordinator": "Academic Coordinator",
-    "Education Manager": "Academic Coordinator",
     "Principal": "Academic Coordinator",
 }
 
 # Priority order for role matching (first match wins)
 ROLE_PRIORITY = [
-    "Academic Coordinator",
-    "Education Manager",
     "Principal",
+    "Education Manager",
+    "Academic Coordinator",
     "Instructor",
 ]
 
@@ -32,20 +31,8 @@ def get_allowed_workspaces(roles):
     Returns:
         list: Names of workspaces the user can access, or None for full access
     """
-    allowed = set()
-
-    # Check if user has any restricted roles
-    has_restricted_role = False
-    for role in roles:
-        if role in ROLE_WORKSPACE_MAP:
-            has_restricted_role = True
-            allowed.add(ROLE_WORKSPACE_MAP[role])
-
-    # If user has no restricted roles, they see all workspaces (full access)
-    if not has_restricted_role:
-        return None  # None means no restriction
-
-    return list(allowed)
+    # Everyone gets full access for now
+    return None
 
 
 def auto_assign_workspace(doc, method=None):
@@ -85,7 +72,7 @@ def auto_assign_workspace(doc, method=None):
         doc.default_workspace = None
 
 
-def get_workspace_permissions(doctype, user=None, permission_type="read"):
+def get_workspace_permissions(user, doctype="Workspace", permission_type="read"):
     """
     Permission query condition for Workspace.
     Returns a condition that restricts workspace visibility.

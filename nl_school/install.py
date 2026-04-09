@@ -12,7 +12,7 @@ def after_install():
 def create_scholarship_manager_role():
     if not frappe.db.exists("Role", "Scholarship Manager"):
         frappe.get_doc(
-            {"doctype": "Role", "role_name": "Scholarship Manager", "desk_access": 1}
+            {"doctype": "Role", "role_name": "Scholarship Manager", "desk_access": 1, "is_custom": 1}
         ).save()
 
 
@@ -40,9 +40,11 @@ def create_school_hierarchy_roles():
     
     for role in roles:
         if not frappe.db.exists("Role", role["role_name"]):
-            frappe.get_doc({"doctype": "Role", **role}).insert(ignore_permissions=True)
-            frappe.db.commit()
+            doc = frappe.get_doc({"doctype": "Role", **role})
+            doc.insert(ignore_permissions=True)
             print(f"Created role: {role['role_name']}")
+    
+    frappe.db.commit()
 
 
 def setup_role_permissions():

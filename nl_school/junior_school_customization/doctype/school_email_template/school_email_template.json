@@ -1,0 +1,145 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "field:template_name",
+  "creation": "2026-04-09 10:00:00.000000",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "template_name",
+    "template_type",
+    "is_default",
+    "column_break_1",
+    "company",
+    "disabled",
+    "section_break_content",
+    "subject",
+    "message",
+    "section_break_attachments",
+    "attach_report_card",
+    "section_break_preview",
+    "preview_info"
+  ],
+  "fields": [
+    {
+      "fieldname": "template_name",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Template Name",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "template_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Template Type",
+      "options": "\nReport Card\nAttendance Notification\nFee Reminder\nEvent Notification\nGeneral Announcement\nAdmission\nGrade Notification\nExam Schedule",
+      "reqd": 1
+    },
+    {
+      "default": "0",
+      "fieldname": "is_default",
+      "fieldtype": "Check",
+      "in_list_view": 1,
+      "label": "Is Default"
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company (School)",
+      "options": "Company"
+    },
+    {
+      "default": "0",
+      "fieldname": "disabled",
+      "fieldtype": "Check",
+      "label": "Disabled"
+    },
+    {
+      "fieldname": "section_break_content",
+      "fieldtype": "Section Break",
+      "label": "Email Content"
+    },
+    {
+      "description": "Email subject line. Use Jinja variables like {{ student_name }}, {{ academic_term }}, etc.",
+      "fieldname": "subject",
+      "fieldtype": "Data",
+      "label": "Subject",
+      "reqd": 1
+    },
+    {
+      "description": "Email body content. Use Jinja templating for dynamic content.",
+      "fieldname": "message",
+      "fieldtype": "Text Editor",
+      "label": "Message",
+      "reqd": 1
+    },
+    {
+      "fieldname": "section_break_attachments",
+      "fieldtype": "Section Break",
+      "label": "Attachment Settings"
+    },
+    {
+      "default": "0",
+      "depends_on": "eval:doc.template_type=='Report Card'",
+      "fieldname": "attach_report_card",
+      "fieldtype": "Check",
+      "label": "Attach Report Card PDF"
+    },
+    {
+      "fieldname": "section_break_preview",
+      "fieldtype": "Section Break",
+      "label": "Help"
+    },
+    {
+      "fieldname": "preview_info",
+      "fieldtype": "HTML",
+      "label": "Preview Info",
+      "options": "<div class=\"alert alert-info\">\n<h5>Available Template Variables:</h5>\n<h6>Common Variables:</h6>\n<ul>\n<li><strong>{{ student_name }}</strong> - Student's full name</li>\n<li><strong>{{ student }}</strong> - Student ID</li>\n<li><strong>{{ guardian_name }}</strong> - Guardian's name</li>\n<li><strong>{{ company }}</strong> - School name</li>\n<li><strong>{{ academic_year }}</strong> - Academic year</li>\n<li><strong>{{ academic_term }}</strong> - Academic term</li>\n<li><strong>{{ program }}</strong> - Program/Class name</li>\n</ul>\n<h6>Report Card Variables:</h6>\n<ul>\n<li><strong>{{ total_score }}</strong> - Total score</li>\n<li><strong>{{ grade }}</strong> - Overall grade</li>\n<li><strong>{{ rank }}</strong> - Class rank</li>\n<li><strong>{{ class_teacher }}</strong> - Class teacher name</li>\n</ul>\n<h6>Attendance Variables:</h6>\n<ul>\n<li><strong>{{ attendance_date }}</strong> - Date of attendance</li>\n<li><strong>{{ status }}</strong> - Present/Absent</li>\n</ul>\n<h6>Fee Variables:</h6>\n<ul>\n<li><strong>{{ amount_due }}</strong> - Amount due</li>\n<li><strong>{{ due_date }}</strong> - Payment due date</li>\n</ul>\n</div>"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2026-04-09 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Junior School Customization",
+  "name": "School Email Template",
+  "naming_rule": "By fieldname",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Education Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": [],
+  "track_changes": 1
+}

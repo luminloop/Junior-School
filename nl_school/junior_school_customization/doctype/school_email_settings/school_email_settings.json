@@ -1,0 +1,204 @@
+{
+  "actions": [],
+  "allow_rename": 0,
+  "creation": "2026-04-09 10:00:00.000000",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "company",
+    "section_break_smtp",
+    "default_email_account",
+    "column_break_smtp",
+    "sender_name",
+    "section_break_purpose",
+    "email_accounts",
+    "section_break_notifications",
+    "enable_attendance_notifications",
+    "attendance_email_account",
+    "column_break_notif1",
+    "enable_fee_notifications",
+    "fee_email_account",
+    "section_break_notif2",
+    "enable_grade_notifications",
+    "grade_email_account",
+    "column_break_notif2",
+    "enable_event_notifications",
+    "event_email_account",
+    "section_break_domain",
+    "custom_domain",
+    "domain_verified"
+  ],
+  "fields": [
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Company (School)",
+      "options": "Company",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "section_break_smtp",
+      "fieldtype": "Section Break",
+      "label": "Default Email Settings"
+    },
+    {
+      "description": "Select the default email account for sending school emails",
+      "fieldname": "default_email_account",
+      "fieldtype": "Link",
+      "label": "Default Email Account",
+      "options": "Email Account"
+    },
+    {
+      "fieldname": "column_break_smtp",
+      "fieldtype": "Column Break"
+    },
+    {
+      "description": "Name to display as the sender (e.g., 'School Admin')",
+      "fieldname": "sender_name",
+      "fieldtype": "Data",
+      "label": "Sender Name"
+    },
+    {
+      "fieldname": "section_break_purpose",
+      "fieldtype": "Section Break",
+      "label": "Email Accounts by Purpose"
+    },
+    {
+      "description": "Assign different email accounts for different purposes",
+      "fieldname": "email_accounts",
+      "fieldtype": "Table",
+      "label": "Email Accounts",
+      "options": "School Email Account Purpose"
+    },
+    {
+      "fieldname": "section_break_notifications",
+      "fieldtype": "Section Break",
+      "label": "Notification Settings"
+    },
+    {
+      "default": "0",
+      "fieldname": "enable_attendance_notifications",
+      "fieldtype": "Check",
+      "label": "Enable Attendance Notifications"
+    },
+    {
+      "depends_on": "eval:doc.enable_attendance_notifications",
+      "fieldname": "attendance_email_account",
+      "fieldtype": "Link",
+      "label": "Attendance Email Account",
+      "options": "Email Account"
+    },
+    {
+      "fieldname": "column_break_notif1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "0",
+      "fieldname": "enable_fee_notifications",
+      "fieldtype": "Check",
+      "label": "Enable Fee Notifications"
+    },
+    {
+      "depends_on": "eval:doc.enable_fee_notifications",
+      "fieldname": "fee_email_account",
+      "fieldtype": "Link",
+      "label": "Fee Email Account",
+      "options": "Email Account"
+    },
+    {
+      "fieldname": "section_break_notif2",
+      "fieldtype": "Section Break"
+    },
+    {
+      "default": "0",
+      "fieldname": "enable_grade_notifications",
+      "fieldtype": "Check",
+      "label": "Enable Grade Notifications"
+    },
+    {
+      "depends_on": "eval:doc.enable_grade_notifications",
+      "fieldname": "grade_email_account",
+      "fieldtype": "Link",
+      "label": "Grade Email Account",
+      "options": "Email Account"
+    },
+    {
+      "fieldname": "column_break_notif2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "0",
+      "fieldname": "enable_event_notifications",
+      "fieldtype": "Check",
+      "label": "Enable Event Notifications"
+    },
+    {
+      "depends_on": "eval:doc.enable_event_notifications",
+      "fieldname": "event_email_account",
+      "fieldtype": "Link",
+      "label": "Event Email Account",
+      "options": "Email Account"
+    },
+    {
+      "fieldname": "section_break_domain",
+      "fieldtype": "Section Break",
+      "label": "Custom Domain (Advanced)"
+    },
+    {
+      "description": "Custom email domain for the school (e.g., mail.yourschool.com)",
+      "fieldname": "custom_domain",
+      "fieldtype": "Data",
+      "label": "Custom Email Domain"
+    },
+    {
+      "default": "0",
+      "fieldname": "domain_verified",
+      "fieldtype": "Check",
+      "label": "Domain Verified",
+      "read_only": 1
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "issingle": 0,
+  "links": [],
+  "modified": "2026-04-09 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Junior School Customization",
+  "name": "School Email Settings",
+  "naming_rule": "Expression",
+  "autoname": "format:{company}-Email-Settings",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 0,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Education Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": [],
+  "track_changes": 1
+}

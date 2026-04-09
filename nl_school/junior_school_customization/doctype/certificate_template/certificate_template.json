@@ -1,0 +1,172 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "field:template_name",
+  "creation": "2026-04-09 10:00:00.000000",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "template_name",
+    "certificate_type",
+    "is_default",
+    "column_break_1",
+    "company",
+    "disabled",
+    "section_break_layout",
+    "page_size",
+    "orientation",
+    "column_break_layout2",
+    "background_image",
+    "section_break_template",
+    "template_html",
+    "section_break_css",
+    "custom_css",
+    "section_break_preview",
+    "preview_info"
+  ],
+  "fields": [
+    {
+      "fieldname": "template_name",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Template Name",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "certificate_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Certificate Type",
+      "options": "\nAcademic Excellence\nParticipation\nAchievement Award\nGraduation\nSports\nExtra Curricular\nBest Student\nAttendance Award\nImprovement Award\nLeadership",
+      "reqd": 1
+    },
+    {
+      "default": "0",
+      "fieldname": "is_default",
+      "fieldtype": "Check",
+      "in_list_view": 1,
+      "label": "Is Default"
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company (School)",
+      "options": "Company"
+    },
+    {
+      "default": "0",
+      "fieldname": "disabled",
+      "fieldtype": "Check",
+      "label": "Disabled"
+    },
+    {
+      "fieldname": "section_break_layout",
+      "fieldtype": "Section Break",
+      "label": "Page Layout"
+    },
+    {
+      "default": "A4",
+      "fieldname": "page_size",
+      "fieldtype": "Select",
+      "label": "Page Size",
+      "options": "A4\nLetter\nA3"
+    },
+    {
+      "default": "Landscape",
+      "fieldname": "orientation",
+      "fieldtype": "Select",
+      "label": "Orientation",
+      "options": "Portrait\nLandscape"
+    },
+    {
+      "fieldname": "column_break_layout2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "description": "Upload a background image for the certificate",
+      "fieldname": "background_image",
+      "fieldtype": "Attach Image",
+      "label": "Background Image"
+    },
+    {
+      "fieldname": "section_break_template",
+      "fieldtype": "Section Break",
+      "label": "Template HTML"
+    },
+    {
+      "description": "Certificate body HTML. Use Jinja templating for dynamic content.",
+      "fieldname": "template_html",
+      "fieldtype": "Code",
+      "label": "Template HTML",
+      "options": "HTML",
+      "reqd": 1
+    },
+    {
+      "fieldname": "section_break_css",
+      "fieldtype": "Section Break",
+      "label": "Custom CSS"
+    },
+    {
+      "description": "Additional CSS styles for the certificate",
+      "fieldname": "custom_css",
+      "fieldtype": "Code",
+      "label": "Custom CSS",
+      "options": "CSS"
+    },
+    {
+      "fieldname": "section_break_preview",
+      "fieldtype": "Section Break",
+      "label": "Help"
+    },
+    {
+      "fieldname": "preview_info",
+      "fieldtype": "HTML",
+      "label": "Preview Info",
+      "options": "<div class=\"alert alert-info\">\n<h5>Available Template Variables:</h5>\n<ul>\n<li><strong>{{ student_name }}</strong> - Student's full name</li>\n<li><strong>{{ student }}</strong> - Student ID</li>\n<li><strong>{{ program }}</strong> - Program/Class name</li>\n<li><strong>{{ company }}</strong> - School name</li>\n<li><strong>{{ company_logo }}</strong> - School logo URL</li>\n<li><strong>{{ academic_year }}</strong> - Academic year</li>\n<li><strong>{{ academic_term }}</strong> - Academic term</li>\n<li><strong>{{ date }}</strong> - Certificate date</li>\n<li><strong>{{ award_title }}</strong> - Award/Achievement title</li>\n<li><strong>{{ description }}</strong> - Award description</li>\n<li><strong>{{ principal_name }}</strong> - Principal name</li>\n<li><strong>{{ principal_signature }}</strong> - Principal signature image URL</li>\n<li><strong>{{ class_teacher }}</strong> - Class teacher name</li>\n<li><strong>{{ rubber_stamp }}</strong> - School stamp image URL</li>\n<li><strong>{{ certificate_number }}</strong> - Unique certificate number</li>\n</ul>\n<h5>Example Structure:</h5>\n<pre>\n&lt;div class=\"certificate\"&gt;\n  &lt;div class=\"header\"&gt;\n    &lt;img src=\"{{ company_logo }}\" /&gt;\n    &lt;h1&gt;{{ company }}&lt;/h1&gt;\n  &lt;/div&gt;\n  &lt;div class=\"body\"&gt;\n    &lt;h2&gt;Certificate of {{ certificate_type }}&lt;/h2&gt;\n    &lt;p&gt;This is to certify that&lt;/p&gt;\n    &lt;h3&gt;{{ student_name }}&lt;/h3&gt;\n    &lt;p&gt;{{ description }}&lt;/p&gt;\n  &lt;/div&gt;\n  &lt;div class=\"footer\"&gt;\n    &lt;div class=\"signature\"&gt;\n      &lt;img src=\"{{ principal_signature }}\" /&gt;\n      &lt;p&gt;{{ principal_name }}&lt;/p&gt;\n    &lt;/div&gt;\n  &lt;/div&gt;\n&lt;/div&gt;\n</pre>\n</div>"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2026-04-09 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Junior School Customization",
+  "name": "Certificate Template",
+  "naming_rule": "By fieldname",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Education Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": [],
+  "track_changes": 1
+}

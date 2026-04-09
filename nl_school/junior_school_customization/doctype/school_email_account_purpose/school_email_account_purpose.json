@@ -1,0 +1,49 @@
+{
+  "actions": [],
+  "creation": "2026-04-09 10:00:00.000000",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "purpose",
+    "email_account",
+    "description"
+  ],
+  "fields": [
+    {
+      "fieldname": "purpose",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Purpose",
+      "options": "Report Cards\nFee Reminders\nAttendance Alerts\nGrade Notifications\nEvent Invitations\nAdmission Communications\nGeneral Announcements\nExam Schedules\nNewsletter",
+      "reqd": 1
+    },
+    {
+      "fieldname": "email_account",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Email Account",
+      "options": "Email Account",
+      "reqd": 1
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "in_list_view": 1,
+      "label": "Description"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "istable": 1,
+  "links": [],
+  "modified": "2026-04-09 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Junior School Customization",
+  "name": "School Email Account Purpose",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": [],
+  "track_changes": 1
+}
