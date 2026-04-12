@@ -98,6 +98,8 @@ def generate_batch_report_cards(doc):
             "assessment_group": doc.assessment_group,
             "add_letterhead": doc.get("add_letterhead", 1),
             "include_attendance": doc.get("include_attendance", 1),
+            "include_principal_signature": doc.get("include_principal_signature", 0),
+            "include_teacher_comments": doc.get("include_teacher_comments", 1),
         })
         
         try:
@@ -147,11 +149,95 @@ def generate_batch_report_cards(doc):
     frappe.response.type = "pdf"
 
 
+@frappe.whitelist()
+def preview_batch_report_cards(doc):
+    """
+    Generate HTML preview for batch report cards (without PDF conversion).
+    """
+    import json
+    
+    if isinstance(doc, str):
+        doc = frappe._dict(json.loads(doc))
+    
+    if not doc.get("students") or len(doc.students) == 0:
+        frappe.throw(_("Please select at least one student"))
+    
+    all_html_parts = []
+    
+    # Limit preview to first 3 students for performance
+    preview_students = doc.students[:3] if len(doc.students) > 3 else doc.students
+    is_truncated = len(doc.students) > 3
+    
+    for idx, student_row in enumerate(preview_students):
+        student = student_row.get("student")
+        
+        student_doc = frappe._dict({
+            "student": student,
+            "students": [student],
+            "academic_year": doc.academic_year,
+            "academic_term": doc.academic_term,
+            "assessment_group": doc.assessment_group,
+            "add_letterhead": doc.get("add_letterhead", 1),
+            "include_attendance": doc.get("include_attendance", 1),
+            "include_principal_signature": doc.get("include_principal_signature", 0),
+            "include_teacher_comments": doc.get("include_teacher_comments", 1),
+        })
+        
+        try:
+            template_data = prepare_batch_report_card_data(student_doc)
+            
+            for item in template_data.get("assessment_result", []):
+                if "course" in item and "-" in item["course"]:
+                    item["course"] = item["course"].split("-")[0].strip()
+            
+            html = frappe.render_template(
+                "nl_school/public/html/student_report_generation_tool.html",
+                template_data
+            )
+            
+            if idx < len(preview_students) - 1:
+                html += '<div style="page-break-after: always;"></div>'
+            
+            all_html_parts.append(html)
+            
+        except Exception as e:
+            continue
+    
+    if not all_html_parts:
+        frappe.throw(_("Could not generate any report cards."))
+    
+    # Add truncation notice if needed
+    truncation_notice = ""
+    if is_truncated:
+        truncation_notice = f"""
+        <div style="text-align: center; padding: 20px; background: #fff3cd; border: 1px solid #ffc107; margin: 20px;">
+            <strong>Preview truncated</strong> - Showing 3 of {len(doc.students)} students.<br>
+            Click "Generate Report Cards" to generate the full PDF.
+        </div>
+        """
+    
+    combined_html = "\n".join(all_html_parts) + truncation_notice
+    
+    # Return HTML for preview
+    return combined_html
+
+
 def prepare_batch_report_card_data(doc):
     """
     Prepare all data needed for a single student's report card in batch mode.
     """
     student = doc.students[0]
+    
+    # Fetch full student details
+    student_doc = frappe.get_doc("Student", student)
+    student_name = student_doc.student_name
+    program = student_doc.program
+    
+    # Update doc with student details for template access
+    doc.student = student
+    doc.student_name = student_name
+    doc.program = program
+    
     class_teacher = get_class_teacher(student)
     values = get_formatted_result(doc, get_course=True)
     assessment_groups = get_child_assessment_groups(doc.assessment_group)
