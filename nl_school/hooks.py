@@ -40,6 +40,7 @@ app_include_css = "/assets/nl_school/css/school_dashboard.css"
 app_include_js = [
     "/assets/nl_school/js/instructor_list_filters.js",
     "/assets/nl_school/js/school_dashboard_redirect.js",
+    "/assets/nl_school/js/signature_pad_widget.js",
 ]
 
 

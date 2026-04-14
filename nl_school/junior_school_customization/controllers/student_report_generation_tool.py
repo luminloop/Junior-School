@@ -24,17 +24,20 @@ class StudentReportGenerationTool(Document):
 
 
 @frappe.whitelist()
-def preview_report_card(doc):
-    """Main function to generate report card PDF"""
+def preview_report_card(doc, preview_only=False):
+    """Main function to generate report card PDF or HTML preview"""
     doc = process_document_input(doc)
     template_data = prepare_report_card_data(doc)
 
-    # Course to remove the grade level from the course name
     for item in template_data.get("assessment_result", []):
         if "course" in item and "-" in item["course"]:
             item["course"] = item["course"].split("-")[0].strip()
 
-    generate_pdf_response(doc, template_data)
+    if preview_only:
+        # Return HTML for preview
+        return generate_html_response(template_data)
+    else:
+        generate_pdf_response(doc, template_data)
 
 
 def process_document_input(doc):
@@ -47,7 +50,11 @@ def process_document_input(doc):
 def prepare_report_card_data(doc):
     """Prepare all data needed for the report card template"""
     # Basic document data
-    class_teacher = get_class_teacher(doc.student)
+    class_teacher = get_class_teacher(doc.students[0])
+    principal = get_principal()
+    # If a live signature was captured on the form, override the stored one
+    if doc.get("include_principal_signature") and doc.get("principal_signature_data"):
+        principal["signature"] = doc.get("principal_signature_data")
     values = get_formatted_result(doc, get_course=True)
     assessment_groups = get_child_assessment_groups(doc.assessment_group)
     # Don't use letterhead for report cards - it contains Jinja code meant for invoices
@@ -77,12 +84,18 @@ def prepare_report_card_data(doc):
         "averages": averages,
         "academic_term": doc.academic_term,
         "class_teacher": class_teacher,
+        "principal": principal,
+        "principal_name": principal.get("name"),
+        "principal_signature": principal.get("signature"),
+        "school_name": get_default_company() or "",
         "student_image": get_student_image(doc.student),
         "show_levels": True,
         "show_opener": exam_types_present["Opener Exam"],
         "show_midterm": exam_types_present["Mid Term"],
         "show_endterm": exam_types_present["End Term"],
         "date": now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
+        "include_principal_signature": doc.get("include_principal_signature", 0),
+        "include_teacher_comments": doc.get("include_teacher_comments", 1),
     }
 
 
@@ -154,6 +167,32 @@ def generate_pdf_response(doc, template_data):
     frappe.response.type = "pdf"
 
 
+def generate_html_response(template_data):
+    """Generate and return HTML for preview"""
+    # Check if a custom template is specified
+    template_name = template_data.get("doc", {}).get("report_card_template")
+    
+    # If no template specified, try to get default for the company
+    if not template_name:
+        company = get_default_company()
+        template_name = get_default_template(company)
+    
+    # Get template HTML
+    template_html = None
+    if template_name:
+        template_html = get_template_html(template_name)
+    
+    # Use custom template or fall back to default file
+    if template_html:
+        html = frappe.render_template(template_html, template_data)
+    else:
+        html = frappe.render_template(
+            "nl_school/public/html/student_report_generation_tool.html", template_data
+        )
+    
+    return html
+
+
 def process_assessment_results(assessment_results):
     """Add levels and percentage to assessment results"""
     processed_results = []
@@ -170,7 +209,40 @@ def process_assessment_results(assessment_results):
             percentage = result["total_score"]
         grade_info = get_grade(percentage, grading_scale)
         result["levels"] = grade_info.get("levels") or result.get("grade") or "-"
-        result["percentage"] = round(percentage, 1)  # Add percentage for chart
+        result["percentage"] = round(percentage, 1)
+        
+        # Auto-generate teacher comments if enabled and no existing comment
+        try:
+            company = frappe.defaults.get_user_default("Company")
+            if company:
+                settings = frappe.get_all(
+                    "School Email Settings",
+                    filters={"company": company, "auto_generate_comment": 1},
+                    fields=["teacher_comment_template"]
+                )
+                
+                if settings and settings[0].teacher_comment_template:
+                    # Check if this result already has a comment
+                    existing_comments = frappe.get_all(
+                        "Subject Teacher Comment",
+                        {"parent": result["name"]},
+                        ["comment"]
+                    )
+                    
+                    if not existing_comments:
+                        # Auto-generate comment based on grade
+                        auto_comment = get_auto_teacher_comment(
+                            result.get("student"),
+                            result.get("course"),
+                            result.get("grade"),
+                            result.get("total_score")
+                        )
+                        if auto_comment:
+                            # Store as subject_teacher_comments for template
+                            result["auto_generated_comment"] = auto_comment
+        except Exception:
+            pass
+        
         processed_results.append(result)
     return processed_results
 
@@ -509,6 +581,67 @@ def get_class_teacher(student_name):
             "instructor_name"
         )
         return class_teacher
+
+
+def get_principal(company=None):
+    """Get the principal name and signature for the school."""
+    if not company:
+        company = frappe.defaults.get_user_default("Company")
+    
+    principal_data = {
+        "name": None,
+        "signature": None
+    }
+    
+    if company:
+        # Try to get principal from School Email Settings (company-specific)
+        settings = frappe.get_all(
+            "School Email Settings",
+            filters={"company": company},
+            fields=["name", "principal_name", "principal_signature"]
+        )
+        
+        if settings:
+            principal_data["name"] = settings[0].principal_name
+            principal_data["signature"] = settings[0].principal_signature
+    
+    return principal_data
+
+
+def get_auto_teacher_comment(student_name, course, grade, score):
+    """Auto-generate teacher comment based on grade."""
+    try:
+        company = frappe.defaults.get_user_default("Company")
+        
+        if not company:
+            return None
+        
+        # Get settings for auto-generation
+        settings = frappe.get_all(
+            "School Email Settings",
+            filters={"company": company, "auto_generate_comment": 1},
+            fields=["teacher_comment_template", "name"]
+        )
+        
+        if not settings or not settings[0].teacher_comment_template:
+            return None
+        
+        template = settings[0].teacher_comment_template
+        student = frappe.get_doc("Student", student_name)
+        
+        # Render template with variables
+        from jinja2 import Template
+        comment = Template(template).render(
+            student_name=student.student_name,
+            course=course,
+            grade=grade,
+            score=score
+        )
+        
+        return comment
+    
+    except Exception:
+        return None
 
 
 # TODO: Add the function to create charts and convert them to images

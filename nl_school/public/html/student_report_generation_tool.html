@@ -1,663 +1,479 @@
+{#
+    Minimal monochrome CBC report card — hierarchy-first, low-chrome.
+    Uses only the data the generation tools already prepare.
+#}
+{% set program_name = (doc.program or "") %}
+{% set grade_number = program_name | replace("Grade ", "") | trim %}
+{% set term_number = "" %}
+{% if doc.academic_term %}
+    {% if "1" in doc.academic_term %}{% set term_number = "1" %}
+    {% elif "2" in doc.academic_term %}{% set term_number = "2" %}
+    {% elif "3" in doc.academic_term %}{% set term_number = "3" %}
+    {% endif %}
+{% endif %}
+
+{% set subjects = {} %}
+{% set subject_order = [] %}
+{% for result in values.assessment_result %}
+    {% set course = result.course %}
+    {% if course not in subjects %}
+        {% set _ = subject_order.append(course) %}
+        {% set _ = subjects.update({course: {}}) %}
+    {% endif %}
+    {% set _ = subjects[course].update({result.assessment_group: {
+        "marks": result.total_score,
+        "max": result.get("maximum_score"),
+        "level": result.levels,
+        "percentage": result.get("percentage", 0),
+    }}) %}
+{% endfor %}
+
+{% set totals = {"Opener Exam": {"sum": 0, "max": 0}, "Mid Term": {"sum": 0, "max": 0}, "End Term": {"sum": 0, "max": 0}} %}
+{% for result in values.assessment_result %}
+    {% set ag = result.assessment_group %}
+    {% if ag in totals %}
+        {% set _ = totals[ag].update({
+            "sum": totals[ag].sum + (result.total_score or 0),
+            "max": totals[ag].max + (result.get("maximum_score") or 0),
+        }) %}
+    {% endif %}
+{% endfor %}
+
+{# Final / most recent term for the hero summary — prefer End Term → Mid Term → Opener #}
+{% set final = averages.end_term if averages.end_term.score != "-" else (averages.mid_term if averages.mid_term.score != "-" else averages.opener) %}
+{% set final_label = "End Term" if averages.end_term.score != "-" else ("Mid Term" if averages.mid_term.score != "-" else "Opener") %}
+
 <style>
-    /* Print-optimized Report Card Styles */
-    @page {
-        size: A4;
-        margin: 15mm;
-    }
+    @page { size: A4; margin: 14mm 15mm; }
 
-    .report-card {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        width: 100%;
-        max-width: 210mm;
+    .rc {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-feature-settings: "ss01", "cv01", "cv11";
+        font-variant-numeric: tabular-nums;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        color: #111;
+        font-size: 10.5px;
+        line-height: 1.5;
+        letter-spacing: 0.01em;
+        max-width: 190mm;
         margin: 0 auto;
-        color: #1a1a2e;
-        line-height: 1.4;
     }
 
-    /* Header Section */
-    .rc-header {
+    .rc .muted { color: #6b7280; }
+    .rc .strong { color: #000; font-weight: 700; }
+    .rc hr.rule { border: none; border-top: 1px solid #111; margin: 0; }
+    .rc hr.rule-light { border: none; border-top: 1px solid #e5e7eb; margin: 0; }
+
+    /* Eyebrow strip */
+    .rc-eyebrow {
         display: flex;
-        align-items: center;
         justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 3px solid #0ba4db;
-        margin-bottom: 16px;
-    }
-
-    .rc-school-info {
-        flex: 1;
-        text-align: center;
-    }
-
-    .rc-school-name {
-        font-size: 20px;
-        font-weight: 700;
-        color: #1a1a2e;
-        margin: 0;
-        letter-spacing: 0.5px;
-    }
-
-    .rc-school-subtitle {
-        font-size: 10px;
-        color: #64748b;
-        margin: 2px 0 0 0;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .rc-title {
-        font-size: 14px;
-        font-weight: 600;
-        color: #0ba4db;
-        margin: 6px 0 0 0;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-    }
-
-    .rc-student-photo {
-        width: 80px;
-        height: 80px;
-        border-radius: 8px;
-        border: 2px solid #e2e8f0;
-        object-fit: cover;
-    }
-
-    /* Student Info Grid */
-    .rc-info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 8px 24px;
-        padding: 12px 16px;
-        background: #f8fafc;
-        border-radius: 8px;
-        margin-bottom: 16px;
-        font-size: 11px;
-    }
-
-    .rc-info-item {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .rc-info-label {
-        font-size: 9px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #64748b;
-        font-weight: 600;
-        margin-bottom: 2px;
-    }
-
-    .rc-info-value {
-        font-size: 12px;
-        font-weight: 600;
-        color: #1a1a2e;
-    }
-
-    /* Main Grades Table */
-    .rc-section-title {
-        font-size: 13px;
-        font-weight: 700;
-        color: #1a1a2e;
-        margin: 0 0 8px 0;
-        padding-bottom: 4px;
-        border-bottom: 2px solid #e2e8f0;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .rc-grades-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 16px;
-        font-size: 10px;
-    }
-
-    .rc-grades-table th {
-        background: #0ba4db;
-        color: #ffffff;
-        padding: 6px 8px;
-        text-align: center;
-        font-weight: 600;
-        font-size: 9px;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        border: 1px solid #098bbf;
-    }
-
-    .rc-grades-table th.subject-col {
-        text-align: left;
-        width: 25%;
-        background: #1a1a2e;
-    }
-
-    .rc-grades-table th.exam-header {
-        background: #334155;
-    }
-
-    .rc-grades-table th.sub-header {
-        background: #475569;
-        font-size: 8px;
-    }
-
-    .rc-grades-table td {
-        padding: 5px 8px;
-        text-align: center;
-        border: 1px solid #e2e8f0;
-        font-size: 10px;
-    }
-
-    .rc-grades-table td.subject-name {
-        text-align: left;
-        font-weight: 600;
-        color: #1a1a2e;
-        background: #f8fafc;
-    }
-
-    .rc-grades-table td.score-cell {
-        font-weight: 600;
-    }
-
-    .rc-grades-table td.grade-cell {
-        font-weight: 700;
-        font-size: 11px;
-    }
-
-    .rc-grades-table td.grade-excellent { color: #16a34a; }
-    .rc-grades-table td.grade-good { color: #ca8a04; }
-    .rc-grades-table td.grade-average { color: #ea580c; }
-    .rc-grades-table td.grade-poor { color: #dc2626; }
-
-    .rc-grades-table tr.average-row td {
-        background: #f1f5f9;
-        font-weight: 700;
-        font-size: 11px;
-        border-top: 2px solid #0ba4db;
-    }
-
-    .rc-grades-table tr.average-row td.subject-name {
-        background: #e2e8f0;
-        color: #0ba4db;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* Performance Summary */
-    .rc-summary-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 12px;
-        margin-bottom: 16px;
-    }
-
-    .rc-summary-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 10px;
-        text-align: center;
-    }
-
-    .rc-summary-card .label {
-        font-size: 9px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #64748b;
-        font-weight: 600;
-        margin-bottom: 4px;
-    }
-
-    .rc-summary-card .value {
-        font-size: 22px;
-        font-weight: 700;
-        color: #1a1a2e;
-    }
-
-    .rc-summary-card .sub {
-        font-size: 10px;
-        color: #64748b;
-        margin-top: 2px;
-    }
-
-    .rc-summary-card.excellent .value { color: #16a34a; }
-    .rc-summary-card.good .value { color: #ca8a04; }
-    .rc-summary-card.average .value { color: #ea580c; }
-    .rc-summary-card.poor .value { color: #dc2626; }
-
-    /* Subject Performance Chart */
-    .rc-chart-container {
-        margin-bottom: 16px;
-        padding: 12px;
-        background: #f8fafc;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
-
-    .rc-chart-title {
-        font-size: 11px;
-        font-weight: 600;
-        color: #1a1a2e;
-        margin: 0 0 8px 0;
-    }
-
-    /* Attendance Section */
-    .rc-attendance {
-        display: flex;
-        gap: 16px;
-        padding: 10px 16px;
-        background: #f8fafc;
-        border-radius: 8px;
-        margin-bottom: 16px;
-        font-size: 11px;
-    }
-
-    .rc-attendance-item {
-        display: flex;
         align-items: center;
-        gap: 6px;
-    }
-
-    .rc-attendance-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-    }
-
-    .rc-attendance-dot.present { background: #16a34a; }
-    .rc-attendance-dot.absent { background: #dc2626; }
-
-    .rc-attendance-label {
-        color: #64748b;
         font-size: 9px;
+        letter-spacing: 2px;
         text-transform: uppercase;
-        letter-spacing: 0.3px;
+        color: #6b7280;
+        padding-bottom: 4px;
     }
 
-    .rc-attendance-value {
-        font-weight: 700;
-        font-size: 14px;
-        color: #1a1a2e;
-    }
-
-    /* Teacher Comments */
-    .rc-comments {
-        margin-bottom: 16px;
-    }
-
-    .rc-comment-block {
-        padding: 10px 14px;
-        background: #f8fafc;
-        border-left: 3px solid #0ba4db;
-        border-radius: 0 6px 6px 0;
-        margin-bottom: 8px;
-    }
-
-    .rc-comment-subject {
-        font-size: 10px;
-        font-weight: 700;
-        color: #0ba4db;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        margin-bottom: 4px;
-    }
-
-    .rc-comment-text {
-        font-size: 11px;
-        color: #475569;
-        line-height: 1.5;
-        font-style: italic;
-    }
-
-    .rc-general-comment {
-        padding: 12px 16px;
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 8px;
-        margin-bottom: 16px;
-    }
-
-    .rc-general-comment .label {
-        font-size: 10px;
-        font-weight: 700;
-        color: #166534;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 4px;
-    }
-
-    .rc-general-comment .text {
-        font-size: 11px;
-        color: #15803d;
-        line-height: 1.5;
-    }
-
-    /* Footer */
-    .rc-footer {
+    /* Hero — student identity + headline result */
+    .rc-hero {
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
-        padding-top: 16px;
-        border-top: 2px solid #e2e8f0;
-        margin-top: 16px;
+        padding: 10px 0 14px;
+        border-bottom: 1px solid #111;
+        margin-bottom: 14px;
     }
-
-    .rc-signature {
-        text-align: center;
+    .rc-hero .identity { flex: 1; }
+    .rc-hero .name {
+        font-family: 'Source Serif 4', 'Source Serif Pro', 'Georgia', 'Times New Roman', serif;
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: -0.4px;
+        color: #000;
+        margin: 0;
+        line-height: 1.15;
     }
-
-    .rc-signature-line {
-        width: 150px;
-        border-bottom: 1px solid #94a3b8;
-        margin-bottom: 4px;
-        height: 30px;
+    .rc-hero .meta {
+        font-size: 10px;
+        color: #6b7280;
+        margin-top: 4px;
     }
+    .rc-hero .meta strong { color: #111; font-weight: 600; }
 
-    .rc-signature-label {
+    .rc-hero .summary {
+        text-align: right;
+        min-width: 160px;
+        padding-left: 16px;
+    }
+    .rc-hero .summary-label {
         font-size: 9px;
-        color: #64748b;
+        letter-spacing: 1.5px;
         text-transform: uppercase;
-        letter-spacing: 0.3px;
+        color: #6b7280;
     }
-
-    .rc-stamp {
-        text-align: right;
+    .rc-hero .summary-value {
+        font-family: 'Source Serif 4', 'Source Serif Pro', 'Georgia', serif;
+        font-size: 38px;
+        font-weight: 600;
+        line-height: 1;
+        color: #000;
+        margin-top: 2px;
+        font-variant-numeric: tabular-nums;
     }
-
-    .rc-stamp img {
-        max-width: 120px;
-        height: auto;
-        opacity: 0.8;
+    .rc-hero .summary-level {
+        font-size: 11px;
+        font-weight: 600;
+        color: #111;
+        margin-top: 2px;
     }
-
-    .rc-date {
+    .rc-hero .summary-context {
         font-size: 9px;
-        color: #94a3b8;
-        text-align: right;
+        color: #6b7280;
+        margin-top: 2px;
+    }
+
+    /* Info line */
+    .rc-info {
+        display: flex;
+        gap: 18px;
+        font-size: 10px;
+        padding: 4px 0 14px;
+        color: #374151;
+    }
+    .rc-info .item { white-space: nowrap; }
+    .rc-info .k { color: #6b7280; margin-right: 4px; letter-spacing: 0.4px; text-transform: uppercase; font-size: 9px; }
+    .rc-info .v { font-weight: 600; color: #111; }
+
+    /* Section head */
+    .rc-section {
+        margin-top: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding-bottom: 6px;
+        border-bottom: 1.5px solid #111;
+    }
+    .rc-section .title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+    .rc-section .sub {
+        font-size: 9px;
+        color: #6b7280;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    /* Scores table — borderless except for horizontal rules */
+    .rc-scores {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 4px;
+        font-size: 10px;
+    }
+    .rc-scores thead th {
+        text-align: center;
+        padding: 8px 6px 6px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #374151;
+        border-bottom: 1px solid #111;
+        background: transparent;
+    }
+    .rc-scores thead th.subject-col { text-align: left; padding-left: 0; }
+    .rc-scores thead th.third { color: #000; }
+    .rc-scores thead tr.sub th {
+        font-size: 8.5px;
+        font-weight: 500;
+        letter-spacing: 0.6px;
+        color: #6b7280;
+        padding: 4px 4px 6px;
+        border-bottom: 1px solid #111;
+    }
+    .rc-scores tbody td {
+        padding: 7px 6px;
+        text-align: center;
+        border-bottom: 1px solid #f1f1f1;
+    }
+    .rc-scores tbody td.subject {
+        text-align: left;
+        padding-left: 0;
+        font-weight: 600;
+        color: #111;
+    }
+    .rc-scores tbody tr:nth-child(even) td { background: #fafafa; }
+    .rc-scores tbody tr:hover td { background: #f5f5f5; }
+
+    /* Emphasise the most-recent (final) exam column */
+    .rc-scores tbody td.final {
+        color: #000;
+        font-weight: 700;
+    }
+    .rc-scores tbody td.level { color: #374151; }
+    .rc-scores tbody td.pct { color: #6b7280; font-size: 9.5px; }
+
+    /* Totals row */
+    .rc-scores tbody tr.totals td {
+        border-top: 1px solid #111;
+        border-bottom: none;
+        background: transparent;
+        padding-top: 10px;
+        font-weight: 700;
+        font-size: 11px;
+    }
+    .rc-scores tbody tr.totals td.subject { letter-spacing: 1px; text-transform: uppercase; font-size: 10px; }
+
+    /* Attendance mini */
+    .rc-attendance {
+        display: flex;
+        gap: 24px;
+        margin-top: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 10px;
+    }
+    .rc-attendance .k { color: #6b7280; margin-right: 4px; letter-spacing: 0.4px; text-transform: uppercase; font-size: 9px; }
+    .rc-attendance .v { font-weight: 700; color: #111; }
+
+    /* Simple fill-in lines */
+    .rc-fields { margin-top: 14px; }
+    .rc-field {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        padding: 10px 0 2px;
+        border-bottom: 1px solid #d1d5db;
+        font-size: 10px;
+    }
+    .rc-field .k {
+        font-size: 9px;
+        color: #6b7280;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    .rc-field .v { color: #111; font-weight: 600; }
+    .rc-field-row {
+        display: flex;
+        gap: 36px;
+    }
+    .rc-field-row .rc-field { flex: 1; }
+
+    /* Examiner comments */
+    .rc-comments {
+        margin-top: 18px;
+    }
+    .rc-comments .head {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+    .rc-comments .sub {
+        font-size: 9px;
+        color: #6b7280;
+        margin-top: 2px;
+    }
+    .rc-comments .line {
+        display: block;
+        height: 18px;
+        border-bottom: 1px solid #d1d5db;
         margin-top: 8px;
     }
 
-    /* Print-specific adjustments */
-    @media print {
-        .report-card {
-            max-width: 100%;
-        }
-        .rc-grades-table th {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        .rc-grades-table td.subject-name {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        .rc-summary-card,
-        .rc-chart-container,
-        .rc-comment-block,
-        .rc-general-comment,
-        .rc-attendance,
-        .rc-info-grid {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
+    /* Signatures */
+    .rc-signs {
+        display: flex;
+        justify-content: space-between;
+        gap: 36px;
+        margin-top: 24px;
     }
+    .rc-signs .block { flex: 1; }
+    .rc-signs .block.right { text-align: right; }
+    .rc-signs .sig-img { max-height: 44px; max-width: 160px; display: block; margin-bottom: 2px; }
+    .rc-signs .right .sig-img { margin-left: auto; }
+    .rc-signs .line {
+        border-bottom: 1px solid #111;
+        margin-top: 18px;
+        width: 100%;
+        max-width: 200px;
+    }
+    .rc-signs .right .line { margin-left: auto; }
+    .rc-signs .label {
+        font-size: 9px;
+        color: #6b7280;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-top: 4px;
+    }
+
+    /* Footer legend */
+    .rc-footer {
+        margin-top: 22px;
+        padding-top: 8px;
+        border-top: 1px solid #111;
+        display: flex;
+        justify-content: space-between;
+        font-size: 8.5px;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: #374151;
+    }
+    .rc-legend { color: #6b7280; }
+    .rc-legend strong { color: #111; font-weight: 700; }
 </style>
 
-<div class="report-card">
-    <!-- Header -->
-    <div class="rc-header">
-        {% if student_image and student_image.startswith('http') %}
-        <img class="rc-student-photo" src="{{ student_image }}" alt="Student">
-        {% else %}
-        <div class="rc-student-photo" style="display:flex;align-items:center;justify-content:center;background:#e2e8f0;font-size:24px;color:#64748b;">
-            {{ (doc.student_name or "S")[0] }}
-        </div>
-        {% endif %}
-        <div class="rc-school-info">
-            <p class="rc-school-name">{{ doc.company or "Lemana Junior School" }}</p>
-            <p class="rc-school-subtitle">Competency-Based Curriculum • Junior Secondary</p>
-            <p class="rc-title">Academic Report Card</p>
-        </div>
-        <div style="width:80px;"></div>
+<div class="rc">
+    <!-- Eyebrow: country / book / year -->
+    <div class="rc-eyebrow">
+        <span>Republic of Kenya &middot; Ministry of Education</span>
+        <span>{{ doc.academic_year or "" }}{% if term_number %} &middot; Term {{ term_number }}{% endif %}</span>
     </div>
 
-    <!-- Student Info Grid -->
-    <div class="rc-info-grid">
-        <div class="rc-info-item">
-            <span class="rc-info-label">Student Name</span>
-            <span class="rc-info-value">{{ doc.student_name or '-' }}</span>
+    <!-- Hero: pupil name + headline result -->
+    <div class="rc-hero">
+        <div class="identity">
+            <h1 class="name">{{ doc.student_name or doc.student or "&mdash;" }}</h1>
+            <div class="meta">
+                <strong>Grade {{ grade_number or "&mdash;" }}</strong>
+                {% if class_teacher %} &middot; {{ class_teacher }}{% endif %}
+                &middot; Termly Exam Result Summary
+            </div>
         </div>
-        <div class="rc-info-item">
-            <span class="rc-info-label">Grade / Class</span>
-            <span class="rc-info-value">{{ doc.program or '-' }}</span>
-        </div>
-        <div class="rc-info-item">
-            <span class="rc-info-label">Stream</span>
-            <span class="rc-info-value">{{ doc.student_group or '-' }}</span>
-        </div>
-        <div class="rc-info-item">
-            <span class="rc-info-label">Academic Term</span>
-            <span class="rc-info-value">{{ doc.academic_term or '-' }}</span>
-        </div>
-        <div class="rc-info-item">
-            <span class="rc-info-label">Class Teacher</span>
-            <span class="rc-info-value">{{ class_teacher or '-' }}</span>
-        </div>
-        <div class="rc-info-item">
-            <span class="rc-info-label">Report Date</span>
-            <span class="rc-info-value">{{ frappe.utils.nowdate() }}</span>
+        <div class="summary">
+            <div class="summary-label">{{ final_label }} Mean</div>
+            <div class="summary-value">
+                {{ ("%.0f" | format(final.score)) if final.score != "-" else "—" }}{% if final.score != "-" %}<span style="font-size: 16px; color: #6b7280; font-weight: 600;">%</span>{% endif %}
+            </div>
+            {% if final.levels and final.levels != "-" %}
+                <div class="summary-level">{{ final.levels }}</div>
+            {% endif %}
+            {% if final.grade and final.grade != "-" %}
+                <div class="summary-context">Grade {{ final.grade }}</div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Grades Table -->
-    <p class="rc-section-title">Academic Performance</p>
-    <table class="rc-grades-table">
+    <!-- Info line -->
+    <div class="rc-info">
+        <div class="item"><span class="k">NEMIS</span><span class="v">{{ doc.student or "—" }}</span></div>
+        <div class="item"><span class="k">School</span><span class="v">{{ school_name or "—" }}</span></div>
+        <div class="item"><span class="k">Class</span><span class="v">{{ program_name or "—" }}</span></div>
+    </div>
+
+    <!-- Term Progress -->
+    <div class="rc-section">
+        <span class="title">Term Progress</span>
+        <span class="sub">Learning Activities &middot; Marks &middot; Performance Level</span>
+    </div>
+    <table class="rc-scores">
         <thead>
             <tr>
-                <th rowspan="2" class="subject-col">Learning Area</th>
-                {% if show_opener %}
-                <th colspan="2" class="exam-header">Opener Exam</th>
-                {% endif %}
-                {% if show_midterm %}
-                <th colspan="2" class="exam-header">Mid Term</th>
-                {% endif %}
-                {% if show_endterm %}
-                <th colspan="2" class="exam-header">End Term</th>
-                {% endif %}
+                <th rowspan="2" class="subject-col">Learning Activity</th>
+                <th colspan="3">First Test</th>
+                <th colspan="3">Second Test</th>
+                <th colspan="3" class="third">Third Test</th>
             </tr>
-            <tr>
-                {% if show_opener %}
-                <th class="sub-header">Score</th>
-                <th class="sub-header">Grade</th>
-                {% endif %}
-                {% if show_midterm %}
-                <th class="sub-header">Score</th>
-                <th class="sub-header">Grade</th>
-                {% endif %}
-                {% if show_endterm %}
-                <th class="sub-header">Score</th>
-                <th class="sub-header">Grade</th>
-                {% endif %}
+            <tr class="sub">
+                <th>Marks</th><th>Level</th><th>%</th>
+                <th>Marks</th><th>Level</th><th>%</th>
+                <th class="third">Marks</th><th class="third">Level</th><th class="third">%</th>
             </tr>
         </thead>
         <tbody>
-            {% set subjects = {} %}
-            {% for result in values.assessment_result %}
-                {% if result.course not in subjects %}
-                    {% set _ = subjects.update({result.course: {}}) %}
-                {% endif %}
-                {% set _ = subjects[result.course].update({result.assessment_group: {"score": result.levels, "grade": result.grade, "percentage": result.get("percentage", 0)}}) %}
+            {% for course in subject_order %}
+                {% set a = subjects[course] %}
+                {% set first = a.get("Opener Exam", {}) %}
+                {% set second = a.get("Mid Term", {}) %}
+                {% set third = a.get("End Term", {}) %}
+                <tr>
+                    <td class="subject">{{ course }}</td>
+                    <td>{{ ("%g" | format(first.marks | round(1))) if first.marks is not none else "" }}</td>
+                    <td class="level">{{ first.level or "" }}</td>
+                    <td class="pct">{{ ("%.0f" | format(first.percentage)) if first.percentage else "" }}</td>
+                    <td>{{ ("%g" | format(second.marks | round(1))) if second.marks is not none else "" }}</td>
+                    <td class="level">{{ second.level or "" }}</td>
+                    <td class="pct">{{ ("%.0f" | format(second.percentage)) if second.percentage else "" }}</td>
+                    <td class="final">{{ ("%g" | format(third.marks | round(1))) if third.marks is not none else "" }}</td>
+                    <td class="final">{{ third.level or "" }}</td>
+                    <td class="final">{{ ("%.0f" | format(third.percentage)) if third.percentage else "" }}</td>
+                </tr>
             {% endfor %}
 
-            {% for course, assessments in subjects.items() %}
-            {% set endterm = assessments.get("End Term", {}) %}
-            {% set endterm_pct = endterm.get("percentage", 0) %}
-            {% set grade_class = "grade-excellent" if endterm_pct >= 70 else "grade-good" if endterm_pct >= 50 else "grade-average" if endterm_pct >= 30 else "grade-poor" %}
-            <tr>
-                <td class="subject-name">{{ course }}</td>
-                {% if show_opener %}
-                <td>{{ assessments.get("Opener Exam", {}).get("score", "-") }}</td>
-                <td class="grade-cell">{{ assessments.get("Opener Exam", {}).get("grade", "-") }}</td>
-                {% endif %}
-                {% if show_midterm %}
-                <td>{{ assessments.get("Mid Term", {}).get("score", "-") }}</td>
-                <td class="grade-cell">{{ assessments.get("Mid Term", {}).get("grade", "-") }}</td>
-                {% endif %}
-                {% if show_endterm %}
-                <td>{{ assessments.get("End Term", {}).get("score", "-") }}</td>
-                <td class="grade-cell {{ grade_class }}">{{ assessments.get("End Term", {}).get("grade", "-") }}</td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-            <tr class="average-row">
-                <td class="subject-name">Overall Average</td>
-                {% if show_opener %}
-                <td>{{ averages.opener.score if averages.opener.score != "-" else "-" }}</td>
-                <td>{{ averages.opener.grade if averages.opener.grade != "-" else "-" }}</td>
-                {% endif %}
-                {% if show_midterm %}
-                <td>{{ averages.mid_term.score if averages.mid_term.score != "-" else "-" }}</td>
-                <td>{{ averages.mid_term.grade if averages.mid_term.grade != "-" else "-" }}</td>
-                {% endif %}
-                {% if show_endterm %}
-                <td>{{ averages.end_term.score if averages.end_term.score != "-" else "-" }}</td>
-                <td>{{ averages.end_term.grade if averages.end_term.grade != "-" else "-" }}</td>
-                {% endif %}
+            <tr class="totals">
+                <td class="subject">Total</td>
+                <td>{{ ("%g" | format(totals["Opener Exam"].sum | round(1))) if totals["Opener Exam"].sum else "" }}</td>
+                <td class="muted">/ {{ ("%g" | format(totals["Opener Exam"].max | round(1))) if totals["Opener Exam"].max else "" }}</td>
+                <td>{{ ("%.0f" | format(averages.opener.score)) if averages.opener.score != "-" else "" }}</td>
+                <td>{{ ("%g" | format(totals["Mid Term"].sum | round(1))) if totals["Mid Term"].sum else "" }}</td>
+                <td class="muted">/ {{ ("%g" | format(totals["Mid Term"].max | round(1))) if totals["Mid Term"].max else "" }}</td>
+                <td>{{ ("%.0f" | format(averages.mid_term.score)) if averages.mid_term.score != "-" else "" }}</td>
+                <td class="final">{{ ("%g" | format(totals["End Term"].sum | round(1))) if totals["End Term"].sum else "" }}</td>
+                <td class="muted">/ {{ ("%g" | format(totals["End Term"].max | round(1))) if totals["End Term"].max else "" }}</td>
+                <td class="final">{{ ("%.0f" | format(averages.end_term.score)) if averages.end_term.score != "-" else "" }}</td>
             </tr>
         </tbody>
     </table>
 
-    <!-- Performance Summary Cards -->
-    <div class="rc-summary-grid">
-        {% set endterm_avg = averages.end_term.score if averages.end_term.score != "-" else 0 %}
-        {% set summary_class = "excellent" if endterm_avg >= 70 else "good" if endterm_avg >= 50 else "average" if endterm_avg >= 30 else "poor" %}
-        <div class="rc-summary-card {{ summary_class }}">
-            <div class="label">End Term Average</div>
-            <div class="value">{{ endterm_avg }}%</div>
-            <div class="sub">{{ averages.end_term.grade if averages.end_term.grade != "-" else "-" }}</div>
-        </div>
-        <div class="rc-summary-card">
-            <div class="label">Attendance</div>
-            {% set att_pct = ((doc.attendance.present or 0) / (doc.attendance.total or 1) * 100) | round(1) %}
-            <div class="value">{{ att_pct }}%</div>
-            <div class="sub">{{ doc.attendance.present or 0 }} / {{ doc.attendance.total or 0 }} days</div>
-        </div>
-        <div class="rc-summary-card">
-            <div class="label">Subjects</div>
-            <div class="value">{{ subjects | length }}</div>
-            <div class="sub">CBC Learning Areas</div>
-        </div>
-    </div>
-
-    <!-- Attendance Bar -->
-    {% if doc.attendance %}
+    {% if include_attendance and doc.attendance %}
     <div class="rc-attendance">
-        <div class="rc-attendance-item">
-            <div class="rc-attendance-dot present"></div>
-            <div>
-                <div class="rc-attendance-label">Present</div>
-                <div class="rc-attendance-value">{{ doc.attendance.present or 0 }}</div>
-            </div>
-        </div>
-        <div class="rc-attendance-item">
-            <div class="rc-attendance-dot absent"></div>
-            <div>
-                <div class="rc-attendance-label">Absent</div>
-                <div class="rc-attendance-value">{{ doc.attendance.absent or 0 }}</div>
-            </div>
-        </div>
-        <div class="rc-attendance-item">
-            <div>
-                <div class="rc-attendance-label">Total Days</div>
-                <div class="rc-attendance-value">{{ doc.attendance.total or 0 }}</div>
-            </div>
-        </div>
+        <div><span class="k">Present</span><span class="v">{{ doc.attendance.present or "-" }}</span></div>
+        <div><span class="k">Absent</span><span class="v">{{ doc.attendance.absent or "-" }}</span></div>
+        <div><span class="k">Total Days</span><span class="v">{{ doc.attendance.total or "-" }}</span></div>
     </div>
     {% endif %}
 
-    <!-- Subject Performance Chart -->
-    {% set chart_data = [] %}
-    {% for result in assessment_result %}
-        {% if result.assessment_group == "End Term" and result.percentage %}
-            {% set _ = chart_data.append({"course": result.course.split("-")[0].strip() if "-" in result.course else result.course, "score": result.percentage}) %}
-        {% endif %}
-    {% endfor %}
+    <!-- Strand coverage / dates -->
+    <div class="rc-fields">
+        <div class="rc-field-row">
+            <div class="rc-field"><span class="k">Opening Date</span><span class="v"></span></div>
+            <div class="rc-field"><span class="k">Strands Covered</span><span class="v"></span></div>
+            <div class="rc-field"><span class="k">Closing Date</span><span class="v"></span></div>
+        </div>
+        <div class="rc-field"><span class="k">Last Strand</span><span class="v"></span></div>
+        <div class="rc-field"><span class="k">Sub-Strand Covered</span><span class="v"></span></div>
+        <div class="rc-field"><span class="k">Strands not covered</span><span class="v"></span></div>
+    </div>
 
-    {% if chart_data %}
-    <div class="rc-chart-container">
-        <p class="rc-chart-title">End Term Subject Performance</p>
-        <svg width="100%" height="{{ (chart_data | length * 28) + 40 }}" viewBox="0 0 550 {{ (chart_data | length * 28) + 40 }}" style="font-family: 'Inter', sans-serif;">
-            {% for item in chart_data %}
-            {% set bar_y = 20 + (loop.index0 * 28) %}
-            {% set bar_width = (item.score / 100) * 380 %}
-            {% set bar_color = "#16a34a" if item.score >= 70 else "#ca8a04" if item.score >= 50 else "#ea580c" if item.score >= 30 else "#dc2626" %}
+    <!-- Examiner comments -->
+    <div class="rc-comments">
+        <div class="head">Examiner's Comments</div>
+        <div class="sub">Care &middot; Compassion &middot; Achievements &middot; PCB Development and Values</div>
+        <span class="line"></span>
+        <span class="line"></span>
+        <span class="line"></span>
+    </div>
 
-            <text x="130" y="{{ bar_y + 15 }}" text-anchor="end" font-size="9" fill="#475569" font-weight="500">{{ item.course[:18] }}{% if item.course | length > 18 %}..{% endif %}</text>
-            <rect x="135" y="{{ bar_y + 2 }}" width="380" height="20" fill="#f1f5f9" rx="3" ry="3"/>
-            <rect x="135" y="{{ bar_y + 2 }}" width="{{ bar_width }}" height="20" fill="{{ bar_color }}" rx="3" ry="3"/>
-            <text x="{{ 140 + bar_width }}" y="{{ bar_y + 15 }}" font-size="9" font-weight="700" fill="#1a1a2e">{{ item.score | round(1) }}%</text>
-            {% endfor %}
-
-            <line x1="135" y1="{{ (chart_data | length * 28) + 25 }}" x2="515" y2="{{ (chart_data | length * 28) + 25 }}" stroke="#e2e8f0" stroke-width="1"/>
-            <text x="135" y="{{ (chart_data | length * 28) + 36 }}" font-size="8" fill="#94a3b8">0</text>
-            <text x="230" y="{{ (chart_data | length * 28) + 36 }}" font-size="8" fill="#94a3b8">25</text>
-            <text x="325" y="{{ (chart_data | length * 28) + 36 }}" font-size="8" fill="#94a3b8">50</text>
-            <text x="420" y="{{ (chart_data | length * 28) + 36 }}" font-size="8" fill="#94a3b8">75</text>
-            <text x="510" y="{{ (chart_data | length * 28) + 36 }}" font-size="8" fill="#94a3b8">100</text>
-        </svg>
-        <div style="display:flex;justify-content:center;gap:16px;margin-top:6px;font-size:9px;color:#64748b;">
-            <span><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px;margin-right:3px;"></span>Excellent (≥70%)</span>
-            <span><span style="display:inline-block;width:10px;height:10px;background:#ca8a04;border-radius:2px;margin-right:3px;"></span>Good (50-69%)</span>
-            <span><span style="display:inline-block;width:10px;height:10px;background:#ea580c;border-radius:2px;margin-right:3px;"></span>Average (30-49%)</span>
-            <span><span style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:2px;margin-right:3px;"></span>Below (‹30%)</span>
+    <!-- Signatures -->
+    <div class="rc-signs">
+        <div class="block">
+            <div class="line"></div>
+            <div class="label">Class Teacher{% if class_teacher %} &mdash; {{ class_teacher }}{% endif %}</div>
+        </div>
+        <div class="block right">
+            {% if include_principal_signature and principal_signature and (principal_signature.startswith('http') or principal_signature.startswith('data:') or principal_signature.startswith('/')) %}
+                <img class="sig-img" src="{{ principal_signature }}" alt="Principal Signature">
+            {% endif %}
+            <div class="line"></div>
+            <div class="label">Principal{% if principal_name %} &mdash; {{ principal_name }}{% endif %}</div>
         </div>
     </div>
-    {% endif %}
 
-    <!-- Subject Teacher Comments -->
-    {% set teacher_comments = [] %}
-    {% for result in values.assessment_result %}
-        {% if result.get("subject_teacher_comments") %}
-            {% for comment in result.subject_teacher_comments %}
-                {% set _ = teacher_comments.append({"course": result.course, "comment": comment.comment}) %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
-
-    {% if teacher_comments %}
-    <p class="rc-section-title">Subject Teacher Comments</p>
-    {% for tc in teacher_comments %}
-    <div class="rc-comment-block">
-        <div class="rc-comment-subject">{{ tc.course }}</div>
-        <div class="rc-comment-text">"{{ tc.comment }}"</div>
-    </div>
-    {% endfor %}
-    {% endif %}
-
-    <!-- General Comment -->
-    {% if doc.custom_teachers_comment or doc.assessment_terms %}
-    <div class="rc-general-comment">
-        <div class="label">Class Teacher's General Comment</div>
-        <div class="text">{{ doc.custom_teachers_comment or doc.assessment_terms }}</div>
-    </div>
-    {% endif %}
-
-    <!-- Footer -->
+    <!-- Footer legend -->
     <div class="rc-footer">
-        <div class="rc-signature">
-            <div class="rc-signature-line"></div>
-            <div class="rc-signature-label">Class Teacher's Signature</div>
-        </div>
-        <div class="rc-signature">
-            <div class="rc-signature-line"></div>
-            <div class="rc-signature-label">Principal's Signature</div>
-        </div>
-        {% if rubber_stamp and rubber_stamp.startswith('http') %}
-        <div class="rc-stamp">
-            <img src="{{ rubber_stamp }}" alt="School Stamp">
-        </div>
-        {% endif %}
-    </div>
-
-    <div class="rc-date">
-        Generated: {{ date }}
+        <span>Grade {{ grade_number or "" }} Assessment Book</span>
+        <span class="rc-legend">
+            <strong>EE</strong> 81&ndash;100 (4)
+            &middot; <strong>ME</strong> 61&ndash;80 (3)
+            &middot; <strong>AE</strong> 41&ndash;60 (2)
+            &middot; <strong>BE</strong> 0&ndash;40 (1)
+        </span>
     </div>
 </div>

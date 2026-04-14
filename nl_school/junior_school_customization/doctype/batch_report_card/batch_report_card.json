@@ -8,19 +8,21 @@
   "filters_section",
   "academic_year",
   "academic_term",
+  "assessment_group",
   "column_break_filters",
   "program",
   "student_group",
-  "assessment_group",
   "options_section",
   "add_letterhead",
-  "column_break_options",
   "include_attendance",
+  "column_break_options",
+  "include_teacher_comments",
+  "include_principal_signature",
+  "principal_signature_pad",
+  "principal_signature_data",
   "students_section",
   "get_students",
-  "students",
-  "actions_section",
-  "generate_report_cards"
+  "students"
  ],
  "fields": [
   {
@@ -43,6 +45,13 @@
    "options": "Academic Term"
   },
   {
+   "fieldname": "assessment_group",
+   "fieldtype": "Link",
+   "label": "Assessment Group",
+   "options": "Assessment Group",
+   "reqd": 1
+  },
+  {
    "fieldname": "column_break_filters",
    "fieldtype": "Column Break"
   },
@@ -59,16 +68,9 @@
    "options": "Student Group"
   },
   {
-   "fieldname": "assessment_group",
-   "fieldtype": "Link",
-   "label": "Assessment Group",
-   "options": "Assessment Group",
-   "reqd": 1
-  },
-  {
    "fieldname": "options_section",
    "fieldtype": "Section Break",
-   "label": "Options"
+   "label": "Output Options"
   },
   {
    "default": "1",
@@ -77,14 +79,38 @@
    "label": "Add Letterhead"
   },
   {
+   "default": "1",
+   "fieldname": "include_attendance",
+   "fieldtype": "Check",
+   "label": "Include Attendance"
+  },
+  {
    "fieldname": "column_break_options",
    "fieldtype": "Column Break"
   },
   {
    "default": "1",
-   "fieldname": "include_attendance",
+   "fieldname": "include_teacher_comments",
    "fieldtype": "Check",
-   "label": "Include Attendance"
+   "label": "Include Teacher Comments"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_principal_signature",
+   "fieldtype": "Check",
+   "label": "Include Principal Signature"
+  },
+  {
+   "depends_on": "eval:doc.include_principal_signature",
+   "fieldname": "principal_signature_pad",
+   "fieldtype": "HTML",
+   "label": "Principal Signature"
+  },
+  {
+   "fieldname": "principal_signature_data",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Principal Signature Data"
   },
   {
    "fieldname": "students_section",
@@ -101,23 +127,12 @@
    "fieldtype": "Table",
    "label": "Students",
    "options": "Batch Report Card Student"
-  },
-  {
-   "fieldname": "actions_section",
-   "fieldtype": "Section Break",
-   "label": "Actions"
-  },
-  {
-   "fieldname": "generate_report_cards",
-   "fieldtype": "Button",
-   "label": "Generate Report Cards",
-   "options": "primary"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-04 11:00:00.000000",
+ "modified": "2026-04-14 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Junior School Customization",
  "name": "Batch Report Card",

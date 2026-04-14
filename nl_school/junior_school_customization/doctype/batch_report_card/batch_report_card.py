@@ -19,6 +19,8 @@ from nl_school.junior_school_customization.controllers.student_report_generation
     get_rubber_stamp,
     get_student_image,
     get_class_teacher,
+    get_principal,
+    get_default_company,
 )
 
 
@@ -88,11 +90,14 @@ def generate_batch_report_cards(doc):
     
     for idx, student_row in enumerate(doc.students):
         student = student_row.get("student")
-        
+
         # Prepare doc for single student
         student_doc = frappe._dict({
             "student": student,
             "students": [student],
+            "student_name": student_row.get("student_name"),
+            "program": student_row.get("program"),
+            "student_group": student_row.get("student_group"),
             "academic_year": doc.academic_year,
             "academic_term": doc.academic_term,
             "assessment_group": doc.assessment_group,
@@ -100,11 +105,12 @@ def generate_batch_report_cards(doc):
             "include_attendance": doc.get("include_attendance", 1),
             "include_principal_signature": doc.get("include_principal_signature", 0),
             "include_teacher_comments": doc.get("include_teacher_comments", 1),
+            "principal_signature_data": doc.get("principal_signature_data"),
         })
-        
+
         try:
             template_data = prepare_batch_report_card_data(student_doc)
-            
+
             # Clean course names
             for item in template_data.get("assessment_result", []):
                 if "course" in item and "-" in item["course"]:
@@ -170,10 +176,13 @@ def preview_batch_report_cards(doc):
     
     for idx, student_row in enumerate(preview_students):
         student = student_row.get("student")
-        
+
         student_doc = frappe._dict({
             "student": student,
             "students": [student],
+            "student_name": student_row.get("student_name"),
+            "program": student_row.get("program"),
+            "student_group": student_row.get("student_group"),
             "academic_year": doc.academic_year,
             "academic_term": doc.academic_term,
             "assessment_group": doc.assessment_group,
@@ -181,6 +190,7 @@ def preview_batch_report_cards(doc):
             "include_attendance": doc.get("include_attendance", 1),
             "include_principal_signature": doc.get("include_principal_signature", 0),
             "include_teacher_comments": doc.get("include_teacher_comments", 1),
+            "principal_signature_data": doc.get("principal_signature_data"),
         })
         
         try:
@@ -227,18 +237,38 @@ def prepare_batch_report_card_data(doc):
     Prepare all data needed for a single student's report card in batch mode.
     """
     student = doc.students[0]
-    
-    # Fetch full student details
-    student_doc = frappe.get_doc("Student", student)
-    student_name = student_doc.student_name
-    program = student_doc.program
-    
+
+    # Fetch student name (Student doctype has student_name but not program -
+    # program lives on Program Enrollment).
+    student_record = frappe.db.get_value(
+        "Student", student, ["student_name"], as_dict=True
+    ) or {}
+    student_name = doc.get("student_name") or student_record.get("student_name") or student
+
+    # Resolve program: prefer the value passed in from the batch row, else look
+    # up the active Program Enrollment for the academic year.
+    program = doc.get("program")
+    if not program:
+        program = frappe.db.get_value(
+            "Program Enrollment",
+            {
+                "student": student,
+                "academic_year": doc.academic_year,
+                "docstatus": 1,
+            },
+            "program",
+        )
+
     # Update doc with student details for template access
     doc.student = student
     doc.student_name = student_name
     doc.program = program
-    
+
     class_teacher = get_class_teacher(student)
+    principal = get_principal()
+    # If a live signature was captured on the form, override the stored one
+    if doc.get("include_principal_signature") and doc.get("principal_signature_data"):
+        principal["signature"] = doc.get("principal_signature_data")
     values = get_formatted_result(doc, get_course=True)
     assessment_groups = get_child_assessment_groups(doc.assessment_group)
     letterhead = get_letter_head(doc, not doc.add_letterhead)
@@ -258,6 +288,7 @@ def prepare_batch_report_card_data(doc):
     
     return {
         "doc": doc,
+        "attendance": doc.attendance,
         "values": values,
         "assessment_result": assessment_results,
         "courses": values.get("courses"),
@@ -268,10 +299,16 @@ def prepare_batch_report_card_data(doc):
         "averages": averages,
         "academic_term": doc.academic_term,
         "class_teacher": class_teacher,
+        "principal": principal,
+        "principal_name": principal.get("name"),
+        "principal_signature": principal.get("signature"),
+        "school_name": get_default_company() or "",
         "student_image": get_student_image(student),
         "show_levels": True,
         "show_opener": exam_types_present["Opener Exam"],
         "show_midterm": exam_types_present["Mid Term"],
         "show_endterm": exam_types_present["End Term"],
         "date": now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
+        "include_principal_signature": doc.get("include_principal_signature", 0),
+        "include_teacher_comments": doc.get("include_teacher_comments", 1),
     }

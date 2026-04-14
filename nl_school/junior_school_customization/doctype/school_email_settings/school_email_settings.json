@@ -27,7 +27,15 @@
     "event_email_account",
     "section_break_domain",
     "custom_domain",
-    "domain_verified"
+    "domain_verified",
+    "section_break_signature",
+    "principal_name",
+    "column_break_sig",
+    "principal_signature",
+    "section_break_teacher_comment",
+    "auto_generate_comment",
+    "column_break_comment",
+    "teacher_comment_template"
   ],
   "fields": [
     {
@@ -159,6 +167,48 @@
       "fieldtype": "Check",
       "label": "Domain Verified",
       "read_only": 1
+    },
+    {
+      "fieldname": "section_break_signature",
+      "fieldtype": "Section Break",
+      "label": "Report Card Signatures"
+    },
+    {
+      "fieldname": "principal_name",
+      "fieldtype": "Data",
+      "label": "Principal Name"
+    },
+    {
+      "fieldname": "column_break_sig",
+      "fieldtype": "Column Break"
+    },
+    {
+      "description": "Upload an image of the principal's signature",
+      "fieldname": "principal_signature",
+      "fieldtype": "Attach Image",
+      "label": "Principal Signature Image"
+    },
+    {
+      "fieldname": "section_break_teacher_comment",
+      "fieldtype": "Section Break",
+      "label": "Teacher Comments"
+    },
+    {
+      "default": "1",
+      "fieldname": "auto_generate_comment",
+      "fieldtype": "Check",
+      "label": "Auto-generate Teacher Comments Based on Grades"
+    },
+    {
+      "fieldname": "column_break_comment",
+      "fieldtype": "Column Break"
+    },
+    {
+      "description": "Template for automatic teacher comments. Use {{ grade }}, {{ score }}, {{ course }}, {{ student_name }}. Examples: 'Excellent performance in {{ course }}', 'Good progress in {{ course }} - {{ grade }}'",
+      "fieldname": "teacher_comment_template",
+      "fieldtype": "Small Text",
+      "label": "Comment Template",
+      "default": "Good progress in {{ course }}. Keep it up!"
     }
   ],
   "index_web_pages_for_search": 1,
